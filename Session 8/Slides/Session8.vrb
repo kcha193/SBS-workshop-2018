@@ -1,0 +1,13 @@
+\frametitle{YAML}
+
+A section of key:value pairs separated by dash lines \texttt{-\/-\/-}
+
+\begin{verbatim}
+---
+title: "title"
+author: "You"
+date: "20 July, 2017"
+output: html_document
+---
+\end{verbatim}
+

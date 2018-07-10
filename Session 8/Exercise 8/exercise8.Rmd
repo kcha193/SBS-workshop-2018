@@ -1,0 +1,82 @@
+---
+title: "Introduction to $\\mathtt{R}$"
+subtitle: "Session 8 -- Advanced Analysis"
+author: "Statistical Consulting Centre"
+date:  |
+  | `r readLines('../../metadata.txt')[2]`
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = FALSE, eval = FALSE)
+
+load("../../RData/Ex5.RData")
+```
+
+
+# 1. Logistic regression
+
+1. Suppose the only information available about `Mercury` concentration was that the lakes were either clean (0) or contaminated (1). Create an object called `cont`, such that `cont` $= 1$ if `Mercury` $>$ 0.53 and `cont` $= 0$ if `Mercury` $\le$ 0.53.
+```{r}
+cont <- ifelse(joined.long.df$Mercury > 0.53, 1, 0)
+```
+
+2. Check the one-way frequency table of `cont`.
+```{r}
+table(cont)
+```
+
+3. Add `cont` to `joined.long.df`.
+```{r}
+joined.long.df$cont <- cont
+```
+
+4. (a) Perform a logistic regression to assess how `pH` influences the probability of contamination.
+```{r}
+myglm <- glm(cont~pH, family = binomial, data = joined.long.df)
+```
+    (b) What is the overall significance of `pH`?
+```{r}
+anova(myglm, test = "Chisq")
+```
+    (c) How does a 1 unit increase in `pH` change the log odds of contamination?
+```{r}
+summary(myglm)
+```
+
+5. (a) Perform another logistic regression to check whether the probability of contamination depends on `Calcium` level.
+
+```{r}
+myglm1 <- glm(cont~Calcium, data = joined.long.df,
+              family = binomial)
+```
+
+    (b) Check the overall significance of `Calcium`.
+```{r}
+anova(myglm1, test = "Chisq")
+
+summary(myglm1)
+```
+
+    (c) Calculate the estimated probability of contamination for all three `Calcium` levels using **R** as calculator.
+```{r}
+exp(1.0726 )/(1 + exp(1.0726 ))
+
+exp(1.0726-1.6116 )/(1 + exp(1.0726-1.6116 ))
+
+exp(1.0726-2.9444)/(1 + exp(1.0726-2.9444))
+
+```
+  
+    (d) Check your answer using `predict()`.
+```{r}
+newdata = data.frame(Calcium = c("High", "Medium", "Low"))
+predict(myglm1, newdata, type = "response")
+```
+
+
+
+
+
+
+

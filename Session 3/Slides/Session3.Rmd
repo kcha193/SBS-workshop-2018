@@ -1,0 +1,670 @@
+---
+title: "Introduction to **R**"
+subtitle: "Session 3 -- Basic R programming and data manipulation"
+date:  |
+  | `r readLines('../../metadata.txt')[2]`
+output:
+  beamer_presentation:
+    theme: "Madrid"
+    colortheme: "crane"
+    fonttheme: "professionalfonts"
+    highlight: tango
+    fig_width: 7
+    fig_height: 6
+    fig_caption: true
+    keep_tex: true
+    includes:
+      in_header: ../../header.tex
+---
+
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(tidy = TRUE)
+knitr::opts_chunk$set(message = FALSE)
+options(width = 50)
+
+load("../../RData/Session3.RData")
+
+```
+
+
+# Functions
+
+A function is a relationship between a set of inputs (arguments) and a set of outputs. E.g., the function is fed some information on which it operates, the results of which are the output.
+
+\vspace{-30pt}
+
+```{r, echo = FALSE, message=FALSE, fig.asp=0.5}    
+require(plotrix)
+plot.new()
+plot.window(xlim = c(-8, 8), ylim = c(-1, 1))
+draw.circle(-6, 0, 2)
+draw.circle(0, 0, 2)
+draw.circle(6, 0, 2)
+text(c(-6, 0, 6), 0, c("Input", "Function", "Output"), cex = 1.4)
+arrows(c(-3.75, 2.25), 0, c(-2.25, 3.75), 0, length = 0.1)
+```
+\vspace{-50pt}
+
+This is an essential building block for the **R** package.    
+
+# Functions
+
+We have seen many functions, e.g. `log()`, `mean()`, `table()`, `with()`, etc.
+
+ \vspace{-30pt}
+```{r, echo = FALSE, message=FALSE, fig.asp=0.5}    
+plot.new()
+plot.window(xlim = c(-8, 8), ylim = c(-1, 1))
+draw.circle(-6, 0, 2)
+draw.circle(0, 0, 2)
+draw.circle(6, 0, 2)
+text(c(-6, 0, 6), 0, c("1, 2, 3, 4", "Mean", "2.5"), cex = 1.4)
+arrows(c(-3.75, 2.25), 0, c(-2.25, 3.75), 0, length = 0.1)
+```
+
+# Working with functions
+
+- Functions can be user-defined, i.e., you can write your own.
+- **Output is the last line of the function.** You can use `return()` to specify the output.
+- Here is a function calculates the standard error of the mean (SEM):
+ \vspace{-2pt}
+$$
+\mathrm{\hat{SEM}} = \frac{s}{\sqrt{N}}
+$$
+ \vspace{-7pt}
+
+```{r}
+mystder <- function(x){
+    mysd <- sd(x, na.rm = TRUE) # Calc std. deviation
+    n <- length(x)              # Calc sample size
+    mysd/sqrt(n)                # Definition of SEM
+}
+mystder(patient.df$Height)
+```
+
+- A set of user-defined functions can be bundled together into an **R** package.
+
+# **R** Packages
+- Currently, the CRAN package repository features 12,619 available packages (12 June 2018). There are about 15,310 CRAN, BioConductor and Github packages in total.
+- To install packages in **R**Studio, click on the **Packages** tab in the lower right, then:
+
+    1. Click `Install`
+    2. `Install from: Repository (CRAN)`
+    3. Type the name of the package in `Packages`
+    4. Click **Install**
+
+- Or, you can type `install.packages("`*package name*`")`, e.g. `install.packages("plotrix")`.
+- After the installation, use `library("`*package name*`")` to load it into **R**.
+
+Note: Installation is performed only once; however, it must be loaded (i.e. use the command `install.packages("`*package name*`")` in *every* **R** session.
+
+# Getting data into **R**
+
+- Base **R** includes only functions which read data sets saved in simple file formats, e.g. `csv`, `txt`, tab delimited, etc.
+- What if your data was saved in another format, e.g. Excel? 
+- The `readxl` package for **R** contains functions that may help, [https://cran.r-project.org/web/packages/readxl/index.html][readxl]
+  
+```{r, eval = FALSE}
+library(readxl)
+excel <- read_excel("data.xlsx", sheet = 1)
+```
+
+[readxl]: https://cran.r-project.org/web/packages/readxl/index.html
+
+# Getting data into **R**
+
+- What if your data was saved in another format, e.g. STATA, SPSS, or SAS? 
+- The `haven` package for **R** contains functions that may help, [https://cran.r-project.org/web/packages/haven/index.html][haven]
+  
+```{r, eval = FALSE}
+library(haven)
+stata <- read_dta("data.dta")
+spss <- read_sav("data.sav")
+sas <- read_sas("data.sas7bdat")
+sasxport <- read_xpt("data.xpt")
+```
+However, it is always the easiest and safest to read data into **R** from a `CSV` file.
+
+[haven]: https://cran.r-project.org/web/packages/haven/index.html
+
+
+# Install **R** Packages from Bioconductor
+- To install core packages, type the following in an **R** Console panel:
+```{r, eval = FALSE}
+source("https://bioconductor.org/biocLite.R")
+biocLite()
+```
+\vspace{-15pt}
+
+- `source()` function reads **R** code from a file or, in this case, connection.
+
+- Install specific packages, e.g., `edgeR` and `limma`, with
+```{r, eval = FALSE}
+source("https://bioconductor.org/biocLite.R")
+biocLite(c("edgeR", "limma"))
+```
+
+Note: Installation is performed only once; however, it must be loaded (i.e. use the command `install.packages("`*package name*`")` in *every* **R** session.
+
+# Install **R** Packages from Github
+- To install **R** Packages from Github, you need to install `devtools` **R** package first, i.e. type following in an **R** Console panel:
+```{r, eval = FALSE}
+install.packages("devtools")
+```
+
+- Then, install specific packages from specific author's repositories, i.e.
+```{r, eval = FALSE}
+devtools::install_github("author/package")
+```
+
+- For example, with my `kcha193/infoDecompuTE` package, which exists at https://github.com/kcha193/infoDecompuTE, type the following in an **R** Console panel:
+```{r, eval = FALSE}
+devtools::install_github("kcha193/infoDecompuTE")
+```
+
+Note: Installation is performed only once; however, it must be loaded (i.e. use the command `install.packages("`*package name*`")` in *every* **R** session.
+
+
+# Loading **R** Packages
+```{r, message=TRUE, warning=TRUE}
+library(dplyr)
+```
+
+\vspace{-10pt}
+ 
+- You can still use these functions from these packages by using two colons, e.g. `stats::filter()`.
+- Helps to access the exact function from that specific package.
+- this notation can be efficient if you only need to use a package’s function once, e.g. `devtools::install_github()`, as it avoids loading the package with `library()`.
+
+# Different types of data objects in **R**
+
+**R** has 6 different data types:
+
+- character (alphanumeric; `"hello world"`),
+  e.g. `Sex`
+- numeric (real or decimal; `3.14159`),
+  e.g. `Patient.ID`, `Age`, `Race`, `Weight`, `Height` and `Smoke`
+- integer (whole numbers; `256`)
+- logical (`TRUE` or `FALSE`), e.g.
+```{r}
+1 == 1
+2 <= 0
+3 != 2
+```
+
+- factor (numeric or alphanumeric, treated as categorical)
+- complex (numbers with imaginary components; `3i`)
+
+# `factor`
+  \begin{block}{What is a factor?}
+    \textit{A variable which takes either qualitative values, ordinal values or a discrete set of quantitative values. The values of a factor are called its \emph{levels}.}
+  \end{block}
+  
+Examples of factors:  
+
+- `Gender` with 2 **qualitative** levels: `Male` and `Female`.
+- `Education` with 6 **ordinal** levels: `None` $<$ `Primary compl` $<$ `Incpl secondary` $<$ `Secondary compl` $<$ `Incpl university` $<$ `University degree`.
+- `Income` has 9 **quantitative** levels when the mid-values of the income ranges are used: `5000`, `12500`, `17500`, `22500`, `27500`, `35000`, `45000`, `60000` and `85000`.
+
+
+# `factor`
+
+- **R** stores two *additional* pieces of information for each factor: (1) the unique set of levels and (2) an integer value, assigned by **R**, for each unique level. 
+- The integer values are assigned to factor levels so that they have an order associated with them.
+- By default, the unique levels are assigned the values 1, 2,..., according to ascending alphabetical order. This is not always appropriate! 
+
+# `factor`
+
+```{r}
+class(patient.df$Sex)
+
+patient.df$Sex <- factor(patient.df$Sex)
+
+class(patient.df$Sex)
+
+levels(patient.df$Sex)
+```
+
+# `factor`
+
+```{r}
+patient.df$BMI.group <- factor(patient.df$BMI.group)
+levels(patient.df$BMI.group)
+
+```
+
+
+# `factor`
+
+```{r}
+patient.df$BMI.group <- factor(patient.df$BMI.group,
+               levels = c("normal", "overweight", "obese"))
+levels(patient.df$BMI.group)
+
+```
+
+# Which other variables should also be `factors`?
+
+```{r}
+str(patient.df)
+```
+
+# Which other variables should also be `factors`?
+
+```{r}
+patient.df$Race.group <- factor(patient.df$Race.group)
+patient.df$Smoke.group <- factor(patient.df$Smoke.group)
+```
+
+
+# Converting numbers to `factors`
+
+```{r}
+test <- factor(c(0,1,2))
+test
+```
+- then convert back to numbers? 
+
+# And convert `factor` back to numbers
+
+- Need to convert it to character first, using `as.character()`, then convert back to numbers, using  `as.numeric()`. 
+```{r}
+test 
+
+as.numeric(test)
+
+as.numeric(as.character(test))
+```
+
+# Your turn (Binning ages into age groups)
+
+- Sometimes we are interested in examining responses by age group.
+- Now, assign each of the `r nrow(patient.df)` patients to one of three age groups: "Under 35", "36 to 60" and "Over 61".
+- Convert `Age.group` to a `factor` with levels in ascending order.
+
+
+# Your turn (Binning ages into age groups)
+
+Assign each of the `r nrow(patient.df)` patients to one of three age groups: "Under 35", "36 to 60" and "Over 61".
+
+```{r, tidy = FALSE}
+patient.df$Age.group <- 
+  ifelse(patient.df$Age<=35, "Under 35", 
+         ifelse(patient.df$Age <= 60, "36 to 60", "Over 61"))
+table(patient.df$Age.group)
+
+```
+
+# Your turn (Binning ages into age groups)
+
+Convert `Age.group` to a `factor` with levels in ascending order.
+
+```{r}
+patient.df$Age.group <- factor(patient.df$Age.group)
+table(patient.df$Age.group)
+
+```
+
+# Your turn (Binning ages into age groups)
+
+Convert `Age.group` to a `factor` with levels in ascending order.
+
+```{r}
+patient.df$Age.group <- factor(patient.df$Age.group, 
+                           levels = c("Under 35", "36 to 60", "Over 61"))
+table(patient.df$Age.group)
+
+```
+
+# Other way: `if`/`else` statement 
+
+```{r, eval = FALSE}
+  if(test) {
+  #  yes
+  } else{
+  #  no
+  }
+```
+
+- `test`: a logical test.
+- `yes`, what happens if the test is True.
+- `no`, what happens if the test is False.
+
+
+# Other way: `if`/`else` statement 
+
+```{r, eval = FALSE}
+  if(test) {
+  #  yes for (test)
+  } else if(test1) {
+  #  no for (test) but yes for (test1) 
+  } else{
+  #  no for both (test) and (test1)
+  }
+```
+
+# Relational data
+
+- In general, it is rare in data analysis involves only a single table of data. 
+- Examples: 
+    
+    + Patient information and blood test measurements
+    + Experimental design and measurements from the high-throughput biological instrument
+
+# `cholesterol.df`
+Serum Cholesterol level, mg/100ml, measured on:
+
+- `Day1` 
+- `Day5`
+- `Day10`
+
+# Reading data into **R**
+```{r, eval=FALSE, echo = TRUE}
+setwd("your working directory")
+cholesterol.df <- read.csv("Data/CholesterolNA.csv")
+head(cholesterol.df)
+```
+
+```{r, eval=TRUE, echo = FALSE}
+cholesterol.df <- read.csv("..\\..\\data\\CholesterolNA.csv")
+head(cholesterol.df)
+
+```
+
+# `names()`, `dim()` and `str()` functions
+
+```{r, eval=TRUE, echo = TRUE}
+names(cholesterol.df)
+dim(cholesterol.df)
+str(cholesterol.df)
+```
+
+# Combining data frame by columns (`cbind()`)
+```{r}
+combined.df <- cbind(patient.df, cholesterol.df[,-1])
+```
+- Thus, the function for combining the data-frame by rows is `rbind()`.
+- Make sure the dimensions are correct for two combining data-frames. 
+- Also, you need to make sure each row in `patient.df` matches each row in `cholesterol.df`.
+
+
+# Reading data into **R** (Again)
+```{r, eval=FALSE, echo = TRUE}
+setwd("your working directory")
+cholesterol.df <- read.csv("Data/Cholesterol.csv")
+head(cholesterol.df)
+```
+
+```{r, eval=TRUE, echo = FALSE}
+cholesterol.df <- read.csv("..\\..\\data\\Cholesterol.csv")
+head(cholesterol.df)
+```
+
+# `names()`, `dim()` and `str()` functions
+
+```{r, eval=TRUE, echo = TRUE}
+#Names of the variables
+names(cholesterol.df)
+dim(cholesterol.df)
+str(cholesterol.df)
+```
+
+
+# Combining data frame by columns (`cbind()`)
+```{r, error=TRUE}
+combined.df <- cbind(patient.df, cholesterol.df)
+```
+
+
+# Solution 
+
+- Combining the based on the `Patient.ID` in both `patient.df` and `cholesterol.df`.
+- First thing is to make sure the `Patient.ID` are unique in both data-frames. 
+
+# Solution
+
+- Combining the based on the `Patient.ID` in both `patient.df` and `cholesterol.df`.
+- First thing is to make sure the `Patient.ID` are unique in both data-frames. 
+
+```{r}
+sum(table(patient.df$Patient.ID) > 1)
+sum(table(cholesterol.df$Patient.ID) > 1)
+
+```
+
+# `dplyr` **R** package
+
+- `dplyr` **R** package provides some useful functions that correspond to the most data manipulation tasks.
+
+```{r}
+library(dplyr)
+```
+
+- Mutating joins allow you to combine variables from multiple tables, there are four common types: 
+    +  `left_join()`
+    +  `right_join()`
+    +  `full_join()`
+    +  `inner_join()`
+
+
+# `dplyr` **R** package
+```{r, tidy=FALSE}
+x <- data.frame(key = c(1,2,3), val.x = c("x1","x2","x3"))
+y <- data.frame(key = c(1,2,4), val.y = c("y1","y2","y4"))
+```
+
+```{r, echo=FALSE, results='asis'}
+t1 <- knitr::kable(x, format = "latex", booktabs = TRUE)
+t2 <- knitr::kable(y, format = "latex", booktabs = TRUE)
+
+cat(c("\\begin{table}[!htb]
+    \\begin{minipage}{.5\\linewidth}
+      \\caption*{Data-frame x}
+      \\centering",
+        t1,
+    "\\end{minipage}%
+    \\begin{minipage}{.5\\linewidth}
+      \\centering
+        \\caption*{Data-frame y}",
+        t2,
+    "\\end{minipage} 
+\\end{table}"
+)) 
+```
+
+
+# `left_join()` 
+```{r, eval = FALSE, message=FALSE}
+left_join(x, y, by = "key")
+```
+
+- return all rows from `x`, and all columns from `x` and `y`. 
+- Rows in `x` with no match in y will have `NA` values in the new columns. 
+- If there are multiple matches between `x` and `y`, all combinations of the matches are returned.
+
+```{r, echo=FALSE, results='asis'}
+t1 <- knitr::kable(x, format = "latex", booktabs = TRUE)
+t2 <- knitr::kable(y, format = "latex", booktabs = TRUE)
+t3 <- knitr::kable(left_join(x, y), format = "latex", booktabs = TRUE)
+
+cat(c("\\begin{table}[!htb]
+    \\begin{minipage}{.33\\linewidth}
+      \\caption*{Data-frame x}
+      \\centering",
+        t1,
+    "\\end{minipage}%
+    \\begin{minipage}{.33\\linewidth}
+      \\centering
+        \\caption*{Data-frame y}",
+        t2,
+      "\\end{minipage}%
+    \\begin{minipage}{.33\\linewidth}
+      \\centering
+        \\caption*{left join}",
+        t3,
+    "\\end{minipage} 
+\\end{table}"
+)) 
+```
+
+
+# `right_join()` 
+```{r, eval = FALSE, message=FALSE}
+right_join(x, y, by = "key")
+```
+
+- return all rows from `y`, and all columns from `x` and `y`. 
+- Rows in `y` with no match in x will have `NA` values in the new columns. 
+- If there are multiple matches between `x` and `y`, all combinations of the matches are returned.
+
+```{r, echo=FALSE, results='asis'}
+t1 <- knitr::kable(x, format = "latex", booktabs = TRUE)
+t2 <- knitr::kable(y, format = "latex", booktabs = TRUE)
+t3 <- knitr::kable(right_join(x, y), format = "latex", booktabs = TRUE)
+
+cat(c("\\begin{table}[!htb]
+    \\begin{minipage}{.33\\linewidth}
+      \\caption*{Data-frame x}
+      \\centering",
+        t1,
+    "\\end{minipage}%
+    \\begin{minipage}{.33\\linewidth}
+      \\centering
+        \\caption*{Data-frame y}",
+        t2,
+      "\\end{minipage}%
+    \\begin{minipage}{.33\\linewidth}
+      \\centering
+        \\caption*{right join}",
+        t3,
+    "\\end{minipage} 
+\\end{table}"
+))  
+```
+
+# `full_join()` 
+```{r, eval = FALSE, message=FALSE}
+full_join(x, y, by = "key")
+```
+
+- return all rows and all columns from both `x` and `y`. 
+- Where there are not matching values, returns `NA` for the one missing.
+
+```{r, echo=FALSE, results='asis'}
+t1 <- knitr::kable(x, format = "latex", booktabs = TRUE)
+t2 <- knitr::kable(y, format = "latex", booktabs = TRUE)
+t3 <- knitr::kable(full_join(x, y), format = "latex", booktabs = TRUE)
+
+cat(c("\\begin{table}[!htb]
+    \\begin{minipage}{.33\\linewidth}
+      \\caption*{Data-frame x}
+      \\centering",
+        t1,
+    "\\end{minipage}%
+    \\begin{minipage}{.33\\linewidth}
+      \\centering
+        \\caption*{Data-frame y}",
+        t2,
+      "\\end{minipage}%
+    \\begin{minipage}{.33\\linewidth}
+      \\centering
+        \\caption*{full join}",
+        t3,
+    "\\end{minipage} 
+\\end{table}"
+))  
+```
+
+# `inner_join()` 
+```{r, eval = FALSE, message=FALSE}
+inner_join(x, y, by = "key")
+```
+
+- return all rows from `x` where there are matching values in `y`, and all columns from `x` and `y`.
+- If there are multiple matches between `x` and `y`, all combination of the matches are returned.
+
+```{r, echo=FALSE, results='asis'}
+t1 <- knitr::kable(x, format = "latex", booktabs = TRUE)
+t2 <- knitr::kable(y, format = "latex", booktabs = TRUE)
+t3 <- knitr::kable(inner_join(x, y), format = "latex", booktabs = TRUE)
+
+cat(c("\\begin{table}[!htb]
+    \\begin{minipage}{.33\\linewidth}
+      \\caption*{Data-frame x}
+      \\centering",
+        t1,
+    "\\end{minipage}%
+    \\begin{minipage}{.33\\linewidth}
+      \\centering
+        \\caption*{Data-frame y}",
+        t2,
+      "\\end{minipage}%
+    \\begin{minipage}{.33\\linewidth}
+      \\centering
+        \\caption*{inner join}",
+        t3,
+    "\\end{minipage} 
+\\end{table}"
+)) 
+```
+
+# `dplyr` **R** package
+
+These four types of mutating join are differ in their behavior when a match is not found. 
+
+-  `left_join()`
+-  `right_join()`
+-  `full_join()`
+-  `inner_join()`
+
+Which one should we use for `patient.df` and `cholesterol.df` data-frames?
+
+# Combining two data frames
+
+```{r, message=TRUE}
+combined.df <- left_join(patient.df, cholesterol.df)
+```
+
+ 
+```{r}
+combined.df <- left_join(patient.df, cholesterol.df, 
+                         by =  "Patient.ID")
+```
+
+- Variable names:
+```{r}
+names(combined.df)
+```
+
+# Combining two data frames
+
+```{r}
+str(combined.df)
+```
+
+# Renaming variables
+You can change the variable names.
+```{r, tidy=FALSE}
+names(combined.df)[c(1,11,12,13)] <- 
+  c("ID", "Baseline", "PreTrt", "PostTrt")
+
+names(combined.df)
+```
+
+# Summary
+
+- functions
+- **R** packages
+- `factor`
+- Combining two data frames
+
+
+
+
+
+
+
+
+
+
+

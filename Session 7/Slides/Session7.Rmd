@@ -1,0 +1,491 @@
+---
+title: "Introduction to **R**"
+subtitle: "Session 7 -- Simple analysis"
+date:  |
+  | `r readLines('../../metadata.txt')[2]`
+output:
+  beamer_presentation:
+    fig_width: 7
+    fig_height: 6
+    fig_caption: TRUE
+    theme: "Madrid"
+    colortheme: "crane"
+    fonttheme: "professionalfonts"
+    highlight: tango
+    includes:
+      in_header: ../../header1.tex
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(tidy = FALSE, small.mar=TRUE, message = FALSE)
+
+options(width = 100)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+load("../../Rdata/Session5.Rdata")
+```
+
+
+# Regression functions
+
+Two of the most commonly used **R** commands for modeling:
+
+- `lm()`: fits **L**inear **M**odels
+- `glm()`: fits **G**eneralised **L**inear **M**odels.
+
+Note SAS users: `PROC GLM` is **not** the same as **R**'s `glm()`.
+
+There's a lot in these two commands; entire stage 3 statistical courses on linear and generalised linear models.
+
+# Student's T-test in **R**
+
+```
+t.test(y ~ x, data = dataset)
+```
+
+`y`: the continuous response variable.
+
+`x`: grouping variable with 2 levels.
+
+`data`: name of the data frame containing the variables.
+
+
+- Suppose we want to test whether males and females (`x = Sex`) have different Cholesterol levels.
+- After visualising the data, we can perform the t-test in **R**:
+- Categorical variables should be converted to type `factor` before analysis, i.e.
+```
+combined.long.df$Sex <- factor(combined.long.df$Sex)
+```
+
+# Student's t-test in **R**
+
+```{r, echo = FALSE,  warning = FALSE, fig.align='center', out.width = "75%"}
+
+ggplot(combined.long.df, aes(Sex, Cholesterol)) +
+  geom_boxplot() +
+  theme_bw()
+
+```
+
+# Student's t-test in **R**
+
+\vspace{-5pt}
+
+Note that we could log-transform the cholesterol variable and make inferences on the median.
+
+\vspace{-10pt}
+
+```{r, echo = FALSE,  warning = FALSE, fig.align='center', out.width = "70%"}
+ggplot(combined.long.df, aes(Sex, log(Cholesterol))) +
+  geom_boxplot() +
+  labs(y = "Log cholesterol") +
+  theme_bw()
+```
+
+# Student's t-test in **R**
+
+```{r}
+t.test(Cholesterol ~ Sex, data = combined.long.df)
+```
+
+- $p$-value = `r round(t.test(Cholesterol ~ Sex, data = combined.long.df)$p.value, 4)`.
+- We have a strong evidence that the average cholesterol level for male is between 2.95 and 17.5 mg/100ml higher than for female.
+
+
+# Analysis of Variance (ANOVA) in **R** 
+
+- Generalises the t-test to more than 2 groups.
+- Null hypothesis: all group means are equal.
+```
+aov(y ~ x, data = dataset)
+```
+
+# Analysis of Variance (ANOVA) in **R** 
+
+```{r, echo = FALSE,  warning = FALSE, fig.align='center', out.width = "75%"}
+
+ggplot(combined.long.df, aes(Age.group, Cholesterol)) +
+  geom_boxplot() +
+  theme_bw()
+
+```
+
+# Analysis of Variance (ANOVA) in **R** 
+**Example.** Mean Cholesterol level is the same for all three Age groups
+
+```{r}
+tryaov = aov(Cholesterol ~ Age.group, data = combined.long.df)
+```
+
+- `aov()`: **A**nalysis **o**f **V**ariance.
+- Response variable (i.e. `Cholesterol`) is separated by `~` from explanatory variable(s) (i.e. `age.group`).
+- All explanatory variables should be categorical (otherwise it's not ANOVA).
+
+# Analysis of Variance (ANOVA) in **R** 
+
+```{r}
+summary(tryaov)
+```
+
+We have extremely strong evidence that the average cholesterol level in at least one age group is different to at least one other age group.
+
+Which one(s) is(are) different????
+
+# Group means
+
+We can compute a summary table of the results easily with the `model.tables` function:
+
+```{r}
+model.tables(tryaov, "means")
+```
+
+```{r echo = FALSE}
+m <- round(model.tables(tryaov, "means")$tables$'Grand mean', 1)
+gm <- round(model.tables(tryaov, "means")$tables$Age.group, 1)
+```
+
+The mean Cholesterol level...
+
+- over all participants is `r m`.
+
+
+# Group means
+```{r}
+model.tables(tryaov, "means")
+```
+
+```{r echo = FALSE}
+m <- round(model.tables(tryaov, "means")$tables$'Grand mean', 1)
+gm <- round(model.tables(tryaov, "means")$tables$Age.group, 1)
+```
+
+The mean Cholesterol level...
+
+- for "Under 35" group is lower than both that of the "36 to 60" and the "Over 61" groups.
+- for "36 to 60" group is lower than the "Over 61" group.
+
+
+# Group means
+```{r}
+model.tables(tryaov, "means")
+```
+
+Are any pairs of these means statistically different from one another?
+
+# Post-hoc multiple comparisons
+\vspace{-4mm}
+```{r}
+TukeyHSD(tryaov)
+```
+\vspace{-6mm}
+
+- `diff`: estimated difference between two group means.
+- `lwr, upr`: lower and upper limit of the 95\% confidence interval of the estimated difference.
+- `p adj`: `p`-values adjusted for multiple comparisons.
+
+
+# Post-hoc multiple comparisons
+```{r}
+comp <- TukeyHSD(tryaov)
+comp$Age.group
+```
+
+- Mean Cholesterol level for "36 to 60" is `r abs(round(comp$Age.group[1, 1], 1))` mg/100ml **higher** than "Under 35" (`p adj` $<$ 0.0001).
+- Mean Cholesterol level for "Over 61" is `r abs(round(comp$Age.group[2, 1], 1))` mg/100ml **higher** than "Under 35" (`p adj` $<$ 0.0001).
+- Mean Cholesterol level for "Over 61" is `r abs(round(comp$Age.group[3, 1], 1))` mg/100ml **higher** than "36 to 60" (`p adj` $<$ 0.0001).
+
+# From Session 6: Mean Cholesterol level vs Age group
+
+```{r, echo = FALSE, fig.align='center', out.width = "75%"} 
+pp <- data.frame(comp$Age.group)
+pp$Age.group <- factor(rownames(comp$Age.group))
+
+library(ggplot2)
+ggplot(pp, aes(x = Age.group, y = diff)) + geom_point() + 
+  geom_errorbar(aes(ymax = upr, ymin = lwr), width = 0.25) + 
+    theme_bw() +
+  labs(x = "Age group", y = "Difference",
+       title = "Tukey HSD intervals for each age group comparision") +
+  theme(text = element_text(size = 14))
+```
+
+
+
+# Two-way ANOVA in **R**
+
+- The last ANOVA model was fitted using on categorical variable (`Age.group`), hence a *one*-way ANOVA.
+- If we fit a linear model using two categorical, explanatory variables, we have a *two*-way ANOVA.
+- Recall: All categorical variables should be converted into `factor`s.
+
+
+# Two-way ANOVA in **R**
+
+```{r, echo = FALSE,  warning = FALSE, fig.align='center', out.width = "75%"}
+
+ggplot(combined.long.df, aes(Age.group, Cholesterol)) +
+  geom_boxplot() +
+  facet_wrap(~Sex) +
+  theme_bw()
+
+```
+
+# Two-way ANOVA in **R**
+
+```{r, tidy = FALSE}
+try2way <-  aov(Cholesterol ~ Sex * Age.group, combined.long.df)
+```
+  
+- `Sex * Age.group` is equivalent to `Sex + Age.group + Sex:Age.group`.
+
+
+# Two-way ANOVA in **R**
+```{r}
+summary(try2way)
+```
+
+There is significant two-way interaction between \texttt{Sex} and \texttt{Age.group} ($p$-value = 0.0178), i.e., the magnitude of the difference in mean Cholesterol levels between males and females is constant across all age groups, and vice versa.
+
+# Estimated means
+```{r}
+model.tables(try2way, "means")
+```
+
+# Post-hoc pairwise comparisons
+```{r}
+TukeyHSD(try2way)$`Sex:Age.group`
+```
+
+# Three-way ANOVA with `Time` in **R**
+```{r}
+try3way <-  aov(Cholesterol~Sex*Age.group*Time, data = combined.long.df)
+               
+
+summary(try3way)
+```
+
+
+# Test of independence in **R**
+
+```{r, tidy=FALSE}
+smoke.age.tab <- with(combined.df, table(Smoke.group,
+                                         Age.group))
+smoke.age.tab
+```
+
+Do smoking habit depend on age group? 
+
+Statistically speaking, is `Smoke.group` and `Age.group` independent of one another?
+
+
+# Pearson's Chi-squared test in **R**
+
+We can use the `chisq.test` function in **R** to perform a Pearson's Chi-square test for independence:
+
+```{r}
+chisq.test(smoke.age.tab)
+```
+
+- There is evidence ($p$-value $=$ 0.0011) that `Smoke.group` and `Age.group` are not independent of one another.
+
+- Smoking habit does depend on the age group to which patient belong.
+
+
+# Assumptions
+
+- Pearson's Chi-squared tests have certain assumptions.
+- These assumptions are primarily to do with sample size.
+- **R** will give you a warning if these assumptions are not met:
+
+```{r echo = FALSE, error=TRUE}
+mytest <- 1:4
+chisq.test(mytest)
+```
+
+- These assumptions are more likely to be wrong if the sample size is small.
+- If this happens, the alternative is to use Fisher's exact test.
+
+
+# Fisher's exact test in **R**
+Assume `smoke.age.tab` does not meet the underlying assumptions of Pearson's Chi-squared test.
+
+```{r}
+fisher.test(smoke.age.tab)
+```
+
+# Linear regression in **R**
+
+`lm(y ~ x, data = dataset)` is used for linear regression.
+
+`y`, the response variable.
+
+`x`, the explanatory variable.   
+
+`data`: name of the data frame containing the variables.
+
+- There can be more than one explanatory variable, called **multiple** linear regression. 
+
+# Simple linear regression in **R**
+
+When there is only one explanatory variable here, we refer to this a **simple ** linear regression.
+
+```{r, tidy = FALSE, fig.align='center', eval = FALSE}
+with(combined.long.df, plot(Age, Cholesterol))
+```
+\vspace{-35pt}
+```{r, fig.align='center', echo = FALSE, out.width = "70%"}
+with(combined.long.df, plot(Age, Cholesterol))
+```
+
+
+# Fit the regression model 
+
+Let’s carry out the linear regression of Age on Cholesterol level, i.e.
+```{r}
+trylm <- lm(Cholesterol ~ Age, data = combined.long.df)
+```
+
+We now need to check our assumption that the residuals are normally distributed.
+
+# Check normality of the residuals
+
+- We can extract the residuals of the model with `resid()`.
+- We can plot a Quantile-Quantile (QQ) plot with ``qqnorm()`
+
+```{r, eval=FALSE, fig.align='center'}
+qqnorm(resid(trylm))
+qqline(resid(trylm), col = "red")
+```
+\vspace{-30pt}
+```{r, fig.align='center', echo = FALSE, out.width = "60%"}
+qqnorm(resid(trylm))
+qqline(resid(trylm), col = "red")
+```
+
+# Check Residuals plot
+
+```{r, fig.align='center', eval=FALSE}
+plot(predict(trylm), residuals(trylm))
+abline(h = 0, col = 2, lwd = 2)
+```
+\vspace{-30pt}
+```{r, fig.align='center', echo=FALSE, out.width = "75%"}
+plot(predict(trylm), residuals(trylm))
+abline(h = 0, col = 2, lwd = 2)
+```
+
+# Check normality of the residuals
+
+We can refit the model using log cholesterol as our response variable instead:
+
+```{r, eval=FALSE}
+trylmLog <- lm(log(Cholesterol) ~ Age, data = combined.long.df)
+qqnorm(resid(trylmLog))
+qqline(resid(trylmLog), col = "red")
+```
+\vspace{-30pt}
+```{r,  fig.align='center', echo = FALSE, out.width = "65%"}
+trylmLog <- lm(log(Cholesterol) ~ Age, data = combined.long.df)
+qqnorm(resid(trylmLog))
+qqline(resid(trylmLog), col = "red")
+```
+# Check Residuals plot
+
+```{r, fig.align='center', eval=FALSE}
+plot(predict(trylmLog), residuals(trylmLog))
+abline(h = 0, col = 2, lwd = 2)
+```
+\vspace{-30pt}
+```{r, fig.align='center', echo=FALSE, out.width = "75%"}
+plot(predict(trylmLog), residuals(trylmLog))
+abline(h = 0, col = 2, lwd = 2)
+```
+
+# Simple linear regression in **R**
+
+```{r, tidy = FALSE, eval=FALSE}
+summary(trylm)
+```
+
+\vspace{-20pt}
+
+```{r, echo = FALSE}
+summary(trylm)
+```
+
+# Simple linear regression in **R**
+
+```{r, tidy = FALSE, eval=FALSE}
+summary(trylmLog)
+```
+
+\vspace{-20pt}
+
+```{r, echo = FALSE}
+summary(trylmLog)
+```
+
+# Final regression model
+
+```{r, echo = FALSE}
+round(summary(trylmLog)$coef, 4)
+```
+
+
+- The estimated intercept is 5.0765 There is a very strong evidence that this is not zero ($p$-value < 0.0001). 
+- The estimated slope of `Age` is 0.0042. There is a very strong evidence that this is not zero ($p$-value < 0.0001).
+- The fitted line is:
+
+$$ log(Cholesterol) = 5.0765 + 0.0042 \times Age $$
+$$ Cholesterol = e^{5.0765 + 0.0042 \times Age} $$
+
+- For every one year increase in age, the Cholesterol level increase by (exp(0.0042)) = `r exp(0.0042)` **times**.  
+
+
+# Conclusion
+
+- The linear relationship between age and Cholesterol level is statistically significant.
+- Average cholesterol level is positive related to age.
+
+# Add the fitted line
+
+```{r, warning=FALSE, fig.align='center', eval=FALSE}
+with(combined.long.df, plot(Age, log(Cholesterol)))
+abline(trylmLog, col = 2, lwd = 2)
+```
+\vspace{-30pt}
+```{r, warning=FALSE, fig.align='center', echo=FALSE, out.width = "75%"}
+with(combined.long.df, plot(Age, log(Cholesterol)))
+abline(trylmLog, col = 2, lwd = 2)
+```
+
+# Quadratic term
+
+```{r, tidy=FALSE}
+tryquad <- lm(log(Cholesterol) ~ Age + I(Age^2), data = combined.long.df)
+round(summary(tryquad)$coef, 4)
+```
+
+`I(Age^2)` tells R to treat `^` as arithmetical operator, rather than formula operator.
+
+Our fitted curve is:
+
+$$ log(Cholesterol) = 4.7114 + 0.0206 \times Age -0.0002 \times Age^2 $$
+
+# Summary
+
+
+```{r, echo = FALSE}
+data.frame(model = c("**Student's t-test**", "**One-way ANOVA**",
+                    "**Two-way ANOVA**", "**Pearson's Chi-square test**",
+                    "**Fisher's exact test**", "**Linear regression**"),
+           fun = c("`t.test()`", "`aov()`", "`aov()`", "`chisq.test()`",
+                   "`fisher.test()`", "`lm()`")) %>% 
+  knitr::kable(format = "markdown", 
+        col.names = c("Model", "Function"))
+```
+
+
+

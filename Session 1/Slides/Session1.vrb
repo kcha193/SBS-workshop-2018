@@ -1,0 +1,25 @@
+\frametitle{Data frames}
+
+\begin{itemize}
+\tightlist
+\item
+  Use \texttt{data.frame} to create a data frame in \textbf{R}.
+\item
+  A \emph{data frame} is a collection of multiple vectors (as different
+  columns) that can be different types.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{my_characters =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"one"}\NormalTok{, }\StringTok{"two"}\NormalTok{, }\StringTok{"three"}\NormalTok{)}
+\NormalTok{my_numbers =}\StringTok{ }\DecValTok{1}\OperatorTok{:}\DecValTok{3}
+\NormalTok{my_logicals =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\OtherTok{TRUE}\NormalTok{, }\OtherTok{FALSE}\NormalTok{, F)}
+
+\KeywordTok{data.frame}\NormalTok{(my_characters, my_numbers, my_logicals)}
+\NormalTok{##   my_characters my_numbers my_logicals}
+\NormalTok{## 1           one          1        TRUE}
+\NormalTok{## 2           two          2       FALSE}
+\NormalTok{## 3         three          3       FALSE}
+\end{Highlighting}
+\end{Shaded}
+

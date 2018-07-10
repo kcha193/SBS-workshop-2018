@@ -1,0 +1,152 @@
+---
+title: "Introduction to **R**"
+subtitle: "Session 6 -- Advanced Graphics"
+author: "Statistical Consulting Centre"
+date:  |
+  | `r readLines('../../metadata.txt')[2]`
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+ knitr::opts_chunk$set(echo = FALSE)
+# knitr::opts_chunk$set(eval = TRUE)
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+load("../../RData/Ex5.RData")
+```
+
+# 1. Box plot
+
+Using `joined.long.df`, draw a box plot showing the distribution of \texttt{Mercury} for each of the levels of \texttt{Calcium}. The boxplot should look exactly like 
+
+```{r, fig.align='center'}
+joined.long.df %>% 
+  filter(!is.na(Calcium)) %>% 
+  ggplot( aes(Calcium, Mercury)) + 
+    geom_boxplot()+
+    labs(title ="Mercury contaminations in Florida lakes",  
+          x = "Calcium level", y = "Mercury concentration") +
+    theme_bw()  +
+    theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+\newpage
+
+# 2. Scatter plot
+Using `joined.long.df`, draw a scatter plot which shows the relationship between `pH` and `Mercury` for each of the `Calcium` levels. The scatter plot should look exactly the same as 
+
+```{r, fig.align='center'}
+joined.long.df %>% filter(!is.na(Calcium) & !is.na(pH)) %>% 
+ggplot( aes(x = pH, y = Mercury, 
+        col = Calcium, shape = Calcium)) + 
+  geom_point() +
+  labs(title ="Mercury contaminations in Florida lakes",  
+        x = "pH value", y = "Mercury concentration") +
+  theme_bw()  +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+\newpage
+
+# 3. Bar plot
+
+Using `joined.long.df`, draw a bar plot that shows the average `Mercury` concentration for the six combinations of `Calcium` and `pHtype`. The graph should look exactly the same as
+
+```{r, fig.align='center'}
+
+joined.long.df %>% 
+  filter(!is.na(Calcium) & !is.na(pHtype)) %>% 
+  group_by(Calcium, pHtype) %>% 
+  summarise(Mean = mean(Mercury)) %>% 
+  ggplot(aes(x = Calcium, y = Mean, 
+                           fill = pHtype)) + 
+  geom_col(position = "dodge")  +
+  labs(x = "Calcium level", y = "Mean Mercury concentration") +
+  theme_bw()
+
+```
+
+\newpage
+
+# 4. Error-bars 
+1. Using `joined.long.df`, plot the mean `Mercury` concentration for each `Calcium` level (with $\pm$ 1.96 $\times$ SE bars), as shown below
+
+```{r, fig.align='center'}
+C.df <- 
+  joined.long.df %>% 
+  filter(!is.na(Calcium)) %>% 
+  group_by(Calcium) %>%
+  summarise(Mean = mean(Mercury, na.rm = TRUE),
+            SD = sd(Mercury, na.rm = TRUE),
+            N = sum(!is.na(Mercury)),
+            SE = SD/sqrt(N),
+            CI.upr = Mean + 1.96 * SE,
+            CI.lwr = Mean - 1.96 * SE)
+
+ggplot(C.df, aes(x = Calcium, y = Mean)) + 
+  geom_point() +
+  geom_errorbar(aes(ymax = CI.upr, ymin = CI.lwr),
+                width = 0.1)  +
+  labs(x = "Calcium level", y = "Mean Mercury concentration")+
+  theme_bw()
+
+```
+
+\newpage
+
+2. Now reproduce Figure below which shows the mean `Mercury` concentration for each `Calcium` level (with $\pm$ 1.96 $\times$ SE bars) across three `Time` periods. 
+
+```{r, fig.align='center'}
+CA.df <- 
+  joined.long.df %>% 
+  filter(!is.na(Calcium), !is.na(Time)) %>% 
+  group_by(Calcium, Time) %>%
+  summarise(Mean = mean(Mercury, na.rm = TRUE),
+            SD = sd(Mercury, na.rm = TRUE),
+            N = sum(!is.na(Mercury)),
+            SE = SD/sqrt(N),
+            CI.upr = Mean + 1.96 * SE,
+            CI.lwr = Mean - 1.96 * SE)
+
+CA.df$Time <-  factor(CA.df$Time)
+
+dodge <- position_dodge(width=0.2)
+ggplot(CA.df, aes(x = Time, y = Mean,
+                  color = Calcium)) +
+  xlab("Age Group")+
+  ylab("Mean total Nerdy scores") +
+  geom_point(position = dodge) +
+  geom_errorbar(aes(ymax = CI.upr, ymin = CI.lwr),
+                width = 0.1, position = dodge) +
+  geom_path(aes(x = as.numeric(Time)), 
+            position = dodge)  +
+  labs(x = "Time", y = "Mean Mercury concentration") +
+  theme_bw()
+
+```
+
+
+\newpage
+
+# 5. Challenge: Heatmap 
+
+Using `joined.long.df`, draw a heatmap that shows the `Mercury` concentration  for the six combinations of `Calcium` and `pHtype`. The graph should look exactly the same as
+```{r, fig.align='center'}
+joined.long.df %>% 
+  filter(!is.na(Calcium) & !is.na(pHtype)) %>% 
+ggplot(aes(x = pHtype, y = Calcium)) + 
+  geom_tile(aes(fill = Mercury)) + 
+  scale_fill_gradient(low = "red", high = "green") +
+  theme_bw()  +
+  labs(y = "Calcium level", x = "pH level")
+
+```
+
+Hint: `geom_tile()` for the heatmap and `scale_fill_gradient()` for the colour. 
+
+
+

@@ -1,0 +1,570 @@
+---
+title: "Introduction to **R**"
+subtitle: "Session 8 -- Advanced analysis"
+date:  |
+  | `r readLines('../../metadata.txt')[2]`
+output:
+  beamer_presentation:
+    fig_width: 7
+    fig_height: 6
+    fig_caption: true
+    theme: "Madrid"
+    colortheme: "crane"
+    fonttheme: "professionalfonts"
+    highlight: tango
+    includes:
+      in_header: ../../header1.tex
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(tidy = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+
+options(width = 60)
+library(dplyr)
+library(tidyr)
+
+load("../../Rdata/Session5.Rdata")
+```
+
+
+# What if the response variable is **not** continuous?
+So far, we have considered methods for analysing response variables measured on a continuous scale.
+
+Often, measurements are:
+
+- **Counts** per unit time, e.g. number of hours worked in a working week.
+- **Binary** responses, e.g. Gender.
+- **Generalised** linear models: **Poisson** (counts) and **Logistic** (binary) regression
+- **Today** logistic regression **only**
+
+
+
+# Logistic regression in **R**
+
+- Relates a **binary response variable** to a continuous and/or categorical variable.
+
+- Let's illustrate by example using `combine.df`.
+    + Does smoking habit depend on cholesterol level, height or weight?
+    + Does the probability of smoking increase with age?
+    + What characteristics do smoking patients have, i.e. how do smoking patients different from non smoking patients?
+
+Speaking in statistical language, we have a binary response. A patient is either smoking or non-smoking, there is only two possible outcomes.
+
+Logistic regression is typically used in case control studies. In this case, we can treat smoking as case and non-smoking as control.
+
+# Logistic regression in **R**
+
+\centering
+
+**Question**
+
+Is `Age` a useful indicator of people choosing to `smoke`?  
+
+**How do we answer this?**
+
+By relating the **probability** of `smoking` to `Age`.
+
+- Linear regression is **not** suitable here because:
+
+    + It assumes the response variable takes values from $-\infty$ to $+\infty$.
+    + But here takes only two values, namely `smoking` or `non-smoking`!
+
+
+# Relating a probability to an explanatory variable
+
+Let:
+
+- $p = \Pr\left(\mathtt{smoking} \right)$
+- $1-p = \Pr\left(\mathtt{non-smoking} \right)$
+
+\vspace{0.2cm}
+
+**Definition:** The **odds** that a respondent `smokes` is
+$$ \text{odds} = \frac{p}{1-p}. $$
+
+- The **odds** of an event (i.e. `smoking`) tells us how likely that event is to occur relative to it not occurring.
+- To relate $p$ to an explanatory variable, we need the **log-odds**, i.e.
+
+$$ \log\left(\frac{p}{1-p}\right) = \mathtt{Intercept} + \mathtt{Slope} \times \mathtt{Age}. $$
+
+- $\log\left(\frac{p}{1-p}\right)$ is known as the **logit** transformation.
+
+
+# GLMs in **R**: `glm()`
+
+`glm(formula, family, data, ...)`
+
+- `formula:` Similar format as `lm()`; response variable and explanatory variable(s) separated by "\~".
+- `family:` Use `family = binomial` for logistic regression.
+- `data`: name of the data frame containing the variables.
+- `...` See the help file of `glm()` (`?glm`) for other arguments.
+
+
+
+# Logistic regression in **R**: Example
+Suppose we want to find out whether older people are more likely to *smoke*.
+
+Statistically speaking, we want to test whether the probability of `smoking` increases/decreases/does not change with `Age`.
+
+
+
+#  Logistic regression in **R**: Example
+
+- Declare the response variable `Smoke.group` as a integer/numeric.
+
+    + `Yes` is assigned the numeric value 1 and
+    + `No` is assigned numeric value 0.
+  
+- It follows, therefore, that:
+
+    1. $p=\Pr(\mathtt{smoke})$
+    2. $p/(1-p)$ is the odds of participants "smoke" relative to "non-smoke".
+
+Note: Here, the explanatory variable Age is integer/numeric.
+
+
+
+# Logistic regression in **R**: Example
+```{r, tidy = FALSE}
+# class of Smoke.group?
+class(combined.df$Smoke.group)
+
+# Convert Smoke.group to a variable of type 'numeric'
+# Assigned to a new variable Smoke.group1 
+combined.df$Smoke.group1 <- 
+  ifelse(combined.df$Smoke.group == "Yes", 1, 0)
+
+# Numeric values of Smoke.group1?
+class(combined.df$Smoke.group1)
+```
+
+
+# Logistic regression in **R**: Example
+Fit the model with `glm()`
+```{r, tidy = FALSE}
+try.glm <- with(combined.df, 
+        glm(Smoke.group1~Age,family = binomial))
+```
+
+- `family = binomial`, logistic regression.
+
+\vspace{-2mm}
+```{r, eval=FALSE}
+summary(try.glm)
+```
+
+# Logistic regression in **R**: Example
+```{r, echo=FALSE}
+summary(try.glm)
+```
+
+
+# Logistic regression in **R**: Example
+```{r, echo=FALSE}
+summary(try.glm)$coef
+```
+
+\begin{eqnarray*}
+\text{logit}(\text{smoke}) & = & `r round(coef(try.glm)[1], 2)` `r round(coef(try.glm)[2], 2)` \times \text{Age}.\\
+\text{Odds}(\text{smoke}) & = & e^{`r round(coef(try.glm)[1], 2)` `r round(coef(try.glm)[2], 2)` \times \text{Age}}\\
+\text{Probability}(\text{smoke}) & = & \frac{e^{`r round(coef(try.glm)[1], 2)` `r round(coef(try.glm)[2], 2)` \times \text{Age}}}{1 + e^{ `r round(coef(try.glm)[1], 2)` `r round(coef(try.glm)[2], 2)` \times \text{Age}}}
+\end{eqnarray*}
+
+
+# Prediction from the model
+```{r, tidy = FALSE}
+# Logit scale, usually referred to as the
+# 'linear predictor' scale
+lp <- predict(try.glm, data.frame(Age = 70))
+lp
+
+# Calculate the odds
+exp(lp)
+```
+Interpretation: A 70-year old is \textbf{`r round(exp(lp),1)` times} likely to consider *smoke* than *not smoke*. Or, a 70-year old is \textbf{`r round(1/exp(lp),1)` times more} likely to *not smoke* than *smoke*.
+
+
+# Prediction from the model
+```{r, tidy = FALSE}
+#Probability scale
+predict(try.glm, data.frame(Age = 70), type = "response")
+```
+
+Interpretation: The probability that a 70-year old *smokes* is `r round(predict(try.glm, data.frame(Age = 70), type = "response"), 4)` or `r round(predict(try.glm, data.frame(Age = 70), type = "response"), 4)* 100`%.
+
+
+# Putting prediction into context
+```{r, tidy = FALSE}
+#Probability with standard error
+predict(try.glm, data.frame(Age = 70),
+      type = "response", se.fit = TRUE)
+```
+
+
+# Categorical explanatory variables
+```{r, eval = FALSE, tidy = FALSE}
+try.glm2 <- glm(Smoke.group1 ~ Age.group, family = binomial, data = combined.df)
+anova(try.glm2, test = "Chisq")
+```
+
+Analysis of deviance table for a `glm()` object (generated using `anova()`) is analogous to ANOVA table for an `lm()` object.
+
+```{r, echo = FALSE, tidy = FALSE}
+try.glm2 <- glm(Smoke.group1 ~ Age.group, family = binomial, data = combined.df)
+```
+
+
+# Categorical explanatory variables
+
+```{r}
+anova(try.glm2, test = "Chisq")
+```
+
+We have extremely strong evidence that at least one age group has different log-odds of choosing to "smoke" from the other age groups.
+
+
+# Categorical explanatory variables
+```{r}
+summary(try.glm2)
+```
+
+# Categorical explanatory variables
+
+```{r}
+round(summary(try.glm2)$coef, 4)
+```
+
+- `(Intercept)` corresponds to the reference age group, namely "Under 35" which is the one that is *not* listed!
+- So, all subsequent rows of this table are hypothesis tests of the log-odds of the named age group relative to the reference group being  zero. 
+
+
+# Categorical explanatory variables
+```{r}
+round(summary(try.glm2)$coef, 4)
+```
+
++ There is a strong evidence ($p$-value $=$ 0.0040) that the log-odds of choosing to *smoke* for the "Over 61" age group is **lower** than "Under 35".
++ There is **no** evidence ($p$-value $<$ 0.8839) that the log-odds of choosing to *smoke* for "36 to 60" is **lower** from "Under 35".
+    
+# Compare "Over 61" with "36 to 60"
+
+- Create another factor for age group with different reference level.
+```{r, tidy = FALSE}
+Age.refac <- factor(as.character(combined.df$Age.group),
+   levels = c("Over 61", "36 to 60", "Under 35"))
+```
+
+- Re-fit the model.
+```{r, tidy = FALSE}
+try.glm3 <- glm(Smoke.group1 ~ Age.refac,
+                family = binomial,
+                data = combined.df)
+```
+
+
+# Compare "Over 61" with "36 to 60"
+```{r, tidy = FALSE, eval = FALSE}
+summary(try.glm3)
+```
+```{r, echo=FALSE}
+round(summary(try.glm3)$coef, 4)
+```
+
+There is a strong evidence that the log-odds of choosing to *smoke* for the "36 to 60" age group is **higher** than the ``Over 61'' age group.
+
+
+# Exercise 8
+
+
+# **R** Markdown
+
+Combination of Markdown and `knitr` **R** package:  
+
+- Markdown another programming language allows you to write report/comments. 
+- `knitr` **R** package compiles the `R` code for plots, tables, outputs.  
+- Reproducibility  
+- Allow you re-do the analysis with a different set of data.
+
+
+# **R** Markdown
+
+Types of output:
+
+- HTML
+- Word document (MS Word to view)
+- PDF (require LaTex to be installed)
+
+# Markdown
+
+A simple way to write HTML. Almost like a plain English. 
+
+##Input: 
+```
+Markdown is  
+
+- *easy* to use
+- **simple** 
+- fun?
+
+```
+## Output:  
+Markdown is  
+
+- *easy* to use  
+- **simple**  
+- fun?
+
+# Header
+
+Use `#` to create headers.  
+Multiple `#`'s create lower level headers.
+
+```
+# Header
+## Header
+### Header
+#### Header
+```
+
+# Text 
+Text is rendered as plain text. Use underscores (`_`) or asterisk `*` to make italics, two underscores (`__`) or asterisk `**` to make bold. 
+
+
+##Input: 
+```
+*italic*   **bold**
+
+_italic_   __bold__
+```
+## Output:  
+*italic*   **bold**
+
+_italic_   __bold__
+
+
+# Lists 
+
+Use asterisks (`*`), hyphen (`-`) or plus (`+`)  to make bullet points.  
+Use numbers to make numbered lists. 
+
+##Input: 
+```
+* Item 1
+* Item 2
+    + Item 2a
+    + Item 2b
+```
+
+## Output:  
+* Item 1  
+* Item 2  
+    + Item 2a  
+    + Item 2b  
+
+# Lists 
+
+Use numbers to make numbered lists.  
+
+##Input: 
+```
+1. Item 1
+2. Item 2
+3. Item 3
+    (a) Item 3a
+    (b) Item 3b
+```
+
+## Output:  
+1. Item 1
+2. Item 2
+3. Item 3
+    (1) Item 3a
+    (2) Item 3b
+
+# Hyperlinks 
+Use square brackets to denote a link. Place the URL in the parentheses. 
+
+##Input: 
+```
+This is a [link](https://cran.r-project.org/)
+```
+
+## Output: 
+This is a [link](https://cran.r-project.org/)
+
+# Equations
+Equations can be presented using latex command and surround them in `$`'s
+
+##Input:  
+```
+Accoring to Einstein, $E = mc^2$
+```
+
+## Output:  
+According to Einstein, $E = mc^2$
+
+# Equation blocks
+Use two `$`'s to make a centered equation block.
+
+##Input:  
+```
+Accoring to Einstein, $$E = mc^2$$
+```
+
+## Output:  
+Ac coring to Einstein, $$E = mc^2$$
+
+
+# External Images 
+
+Same format as Hyperlinks, with `!` in the front. You can also use URL of the image, proving that you have internet connection. 
+
+## Input: 
+```
+![](Rlogo.png)
+```
+
+## Output: 
+![](Rlogo.png)
+
+# Code 
+
+Insert a chunk of **R** code with 
+
+\includegraphics[width = 0.25\textwidth]{comment.png}
+
+When you compile, **R** markdown will run the code and include its results. 
+
+
+# inline code
+
+Place code in a sentence with `` `r '\x60r #code\x60'` ``. **R** markdown will replace the code with its results. 
+
+## Input:
+Today is `` `r '\x60r Sys.Date()\x60'` ``
+
+## Output
+Today is `r Sys.Date()`
+
+
+# Chuck options 
+
+By default, **R** markdown includes both the code and its results
+
+## Input:
+\includegraphics[width = 0.2\textwidth]{first.png}
+
+## Output
+```{r}
+dim(iris)
+```
+
+
+# `echo`
+
+Add `echo = FALSE` to hide the code. 
+
+## Input:
+\includegraphics[width = 0.25\textwidth]{echo.png}
+
+## Output
+```{r, echo = FALSE}
+dim(iris)
+```
+
+
+# `eval`
+
+Add `eval = FALSE` to prevent the code to run.
+
+## Input:
+\includegraphics[width = 0.25\textwidth]{eval.png}
+
+## Output
+```{r, eval = FALSE}
+dim(iris)
+```
+
+
+# `fig.height`, `fig.width`
+
+To specify the dimension of plots (in inches) with `fig.height` and `fig.width`. 
+
+
+## Input:
+
+\includegraphics[width = 0.75\textwidth]{fig.png}
+
+
+# `fig.height`, `fig.width`
+
+## Output:
+```{r, echo = FALSE, fig.width = 3, fig.height = 5}
+hist(iris$Sepal.Width)
+```
+
+
+# `kable()`
+
+`kable()` in `knitr` **R** package allows you to present tables.  
+
+Note the option `results='asis'`, which will pass through results without reformatting them. 
+
+## Input:
+
+\includegraphics[width = 0.5\textwidth]{kable.png}
+
+
+# `kable()`
+
+`kable()` in `knitr` **R** package allows you to present tables.   
+
+Note the option `results='asis'`, which will pass through results without reformatting them. 
+
+## Output:
+```{r, results='asis'}
+knitr::kable(head(iris))
+```
+
+
+# `knitr` **R** package 
+
+Three important points: 
+
+- The *working directory* is the where the document is placed. (Maybe different to **R** project.)  
+- For each document, Knitr compile the **R** code as a new **R** session. Thus, you need to load the required libraries for *that document*.   
+-  Any object made in one code chunk will be available to code in the later code chunk. 
+- Ctrl + Shift + K: to compile the document. 
+
+# YAML
+
+A section of key:value pairs separated by dash lines `---`
+
+````
+---
+title: "title"
+author: "You"
+date: "20 July, 2017"
+output: html_document
+---
+
+````
+
+# Output Formats
+
+-  html_notebook - Interactive **R** Notebooks  
+-  html_document - HTML document w/ Bootstrap CSS  
+-  pdf_document - PDF document (via LaTeX template)  
+-  word_document - Microsoft Word document (docx)  
+-  odt_document - OpenDocument Text document  
+-  rtf_document - Rich Text Format document  
+-  md_document - Markdown document (various flavors)  
+
+
+
+
+
+
+

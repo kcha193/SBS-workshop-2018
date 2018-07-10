@@ -1,0 +1,600 @@
+---
+title: "Introduction to **R**"
+subtitle: "Session 6 -- Advanced Graphics"
+date:  |
+  | `r readLines('../../metadata.txt')[2]`
+output:
+  beamer_presentation:
+    fig_width: 7
+    fig_height: 6
+    fig_caption: true
+    theme: "Madrid"
+    colortheme: "crane"
+    fonttheme: "professionalfonts"
+    highlight: tango
+    includes:
+      in_header: ../../header1.tex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(tidy = FALSE, message = FALSE, small.mar=TRUE)
+
+options(width = 70)
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+load("../../Rdata/Session5.Rdata")
+```
+
+# `ggplot2` package
+- Documentation: 
+[http://docs.ggplot2.org/current/](http://docs.ggplot2.org/current/)
+
+- recommended reading "The Layered Grammar of Graphics":
+[http://vita.had.co.nz/papers/layered-grammar.pdf](http://vita.had.co.nz/papers/layered-grammar.pdf)
+
+- Load `ggplot2` package
+```{r}
+library(ggplot2)
+```
+
+# Creating a new ggplot
+
+To define the coordinate system, we need to provide 3 pieces of information:
+
+1. Dataset (`combined.long.df`)
+2. Which variable to plot on the x axis (`Age`)
+3. Which variable to plot on the y axis (`Cholesterol`)
+
+```{r, eval = FALSE}
+ggplot(data = combined.long.df,
+       mapping = aes(x = Age, y = Cholesterol))
+```
+
+# Create a new ggplot
+
+- Initialising a ggplot object.
+```{r, fig.height=2, fig.width=3, warning=FALSE, fig.align='center'}
+ggplot(data = combined.long.df,
+       mapping = aes(x = Age, y = Cholesterol))
+```
+
+# Create a new ggplot
+
+- Initialising a ggplot object.
+```{r, eval=FALSE}
+ggplot(data = combined.long.df, 
+       mapping = aes(x = Age, y = Cholesterol))
+```
+There are three common ways to invoke ggplot:
+
+- `ggplot(combined.long.df, aes(x, y, <other aesthetics>))`
+- `ggplot(combined.long.df)`
+- `ggplot()`
+
+# Create a new ggplot
+- assign this ggplot object to a variable
+```{r, fig.height=2, fig.width=3, warning=FALSE, fig.align='center'}
+g <- ggplot(data = combined.long.df, 
+       mapping = aes(x = Age, y =  Cholesterol))
+```
+
+# Create a Scatter plot
+We will tell **R** that we want to add (using `+`) points (`geom_point()`) at the coordinates to create a scatter plot.
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center'}
+g + geom_point()
+```
+\vspace{-20pt}
+- `geom`, short for geometric object, describes the type of plot that you will produce.
+
+# Create a Scatter plot
+- Note that here are three common ways to invoke ggplot: 
+```{r, eval=FALSE, tidy = FALSE}
+ggplot(data = combined.long.df, 
+       mapping = aes(x = Age, y =  Cholesterol)) +
+  geom_point()
+ggplot(data = combined.long.df) + 
+  geom_point( mapping = aes(x = Age, y =  Cholesterol))
+ggplot() + 
+  geom_point(data = combined.long.df, 
+             mapping = aes(x = Age, y =  Cholesterol))
+```
+- Always check the documentation, `?geom_point`, for which aesthetics can be used. 
+
+# First method is recommended
+```{r, fig.height=2, fig.width=3, warning=FALSE, fig.align='center'}
+g <- ggplot(data = combined.long.df, 
+       mapping = aes(x = Age, y =  Cholesterol))
+g + geom_point()
+```
+
+# Control `colour` and `shape`
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center'}
+g + geom_point(aes(colour = Sex, shape = Smoke.group))
+```
+
+# Control `colour` and `shape`
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center', echo = FALSE}
+g + geom_point(aes(colour = Sex, shape = Smoke.group))
+```
+- Always check the documentation, `?geom_point`, for which aesthetics can be used.
+- Note the missing values in the legend labeling.
+
+
+# Modify axis, legend, and plot labels
+```{r, fig.height=2.25, fig.width=4, warning=FALSE, fig.align='center'}
+g <- g + geom_point(aes(colour = Sex, shape = Smoke.group))+
+   labs(title = "Cholesterol level versus Age",
+   x = "Age", y = "Cholesterol level (mg/100ml)")
+g
+```
+
+# `theme()` controls non-data components of the plot
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center', tidy=FALSE}
+g + theme(plot.title = element_text(size=8, hjust = 0.5),
+        axis.title = element_text(size=8),
+        legend.title = element_text(size=8), 
+        legend.text = element_text(size=8) )
+```
+
+# Create a Scatter plot
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center', tidy=FALSE}
+g <- ggplot(
+  data = na.omit(combined.long.df[,
+      c("Age", "Cholesterol", "Sex", "Smoke.group")]), 
+  mapping = aes(x = Age, y =  Cholesterol, 
+                color = Sex, shape = Smoke.group)) + 
+  geom_point() +
+  labs(title ="Cholesterol level versus Age",  
+        x = "Age", y = "Cholesterol level (mg/100ml)")
+```
+
+- `ggplot` object can be further modified. 
+- `na.omit()` returns the object with incomplete cases/rows removed. 
+
+# Create a Scatter plot
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center', tidy=FALSE}
+myTheme <- theme_bw() +
+  theme(plot.title = element_text(size=8, hjust = 0.5),
+        axis.title=element_text(size=8),
+        legend.title = element_text(size=8),
+        legend.text = element_text(size=8) )
+```
+
+- `theme_bw()`: pre-defined black and white theme. 
+- Check out the complete list of available pre-defined themes [here](http://ggplot2.tidyverse.org/reference/ggtheme.html).
+- `myTheme` object can be reused for different types of plot.
+
+
+# Scatter plot
+```{r, fig.height=2.5, fig.width=5, warning=FALSE, fig.align='center'}
+g +  myTheme
+```
+
+# Scatter plot with a smoother
+```{r, fig.height=2.5, fig.width=5, warning=FALSE, fig.align='center', message=FALSE}
+g + geom_smooth() + myTheme
+```
+
+# Box plot using `geom_boxplot()`
+```{r , fig.height=2, fig.width=3, warning=FALSE, fig.align='center', eval = FALSE, tidy=FALSE}
+ggplot(na.omit(combined.long.df[,c("Age.group",
+                                   "Cholesterol")]),
+       aes(x = Age.group, y = Cholesterol)) +
+  geom_boxplot()  +
+  labs(title = "Cholesterol level versus Age",
+      x = "Age Group", y = "Cholesterol level (mg/100ml)") + 
+  myTheme
+```
+ 
+# Side-by-side box plot using `geom_boxplot()` and `fill`
+```{r , fig.height=2, fig.width=3, warning=FALSE, fig.align='center', echo = FALSE}
+ggplot(na.omit(combined.long.df[,c("Age.group", "Cholesterol")]),
+       aes(x = Age.group, y = Cholesterol)) +
+  geom_boxplot()  +
+  labs(title = "Cholesterol level versus Age",
+      x = "Age Group", y = "Cholesterol level (mg/100ml)") + 
+  myTheme
+```
+
+# Side-by-side box plot using `geom_boxplot()` and `fill`
+
+We can use the `fill` (or `colour`) argument to create side-by-side boxplots:
+```{r , fig.height=2, fig.width=3, warning=FALSE, fig.align='center', eval = FALSE, tidy=FALSE}
+ggplot(na.omit(combined.long.df[,c("Age.group", "Cholesterol", 
+                                   "BMI.group")]),
+       aes(x = Age.group, y = Cholesterol, fill = BMI.group)) +
+  geom_boxplot()  +
+  labs(title = "Cholesterol level versus Age and BMI",
+      x = "Age Group", y = "Cholesterol level (mg/100ml)") + 
+  myTheme
+```
+ 
+Note that `colour` argument changes the *points* or *lines* and `fill` argument changes the *interior area*.
+ 
+# Side-by-side box plot using `geom_boxplot()` and `fill`
+```{r , fig.height=2.5, fig.width=4, warning=FALSE, fig.align='center', echo = FALSE}
+ggplot(na.omit(combined.long.df[,c("Age.group", "Cholesterol", "BMI.group")]),
+       aes(x = Age.group, y = Cholesterol, fill = BMI.group)) +
+  geom_boxplot()  +
+  labs(title = "Cholesterol level versus Age and BMI",
+      x = "Age Group", y = "Cholesterol level (mg/100ml)") + 
+  myTheme
+```
+
+# Box plot with panels using `facet_wrap()`
+```{r, fig.height=3, fig.width=4, warning=FALSE, fig.align='center'}
+g <- ggplot(na.omit(combined.long.df[,c("Age.group", 
+                                  "Cholesterol", "Race.group")]),
+       aes(x = Age.group, y = Cholesterol)) +
+  geom_boxplot()  +
+  labs(title = "Cholesterol level versus Age",
+      x = "Age Group", y = "Cholesterol level (mg/100ml)") 
+```
+
+# Box plot with panels using `facet_wrap()`
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center', message = FALSE}
+g + facet_wrap(~Race.group) + myTheme + 
+  theme(axis.text.x  = element_text(angle=30, vjust=1, hjust = 1))
+```
+
+
+# Histogram
+
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center', message = FALSE}
+ggplot(combined.long.df, aes(x = Cholesterol)) +
+  geom_histogram() + myTheme
+
+```
+
+# Histogram with wider binwidth
+
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center'}
+ggplot(combined.long.df, aes(x = Cholesterol)) +
+  geom_histogram(binwidth = 10)+
+  labs(x = "Cholesterol level (mg/100ml)") + myTheme
+```
+
+# Histogram with narrower binwidth
+
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center'}
+ggplot(combined.long.df, aes(x = Age)) +
+  geom_histogram(binwidth = 1)+
+  labs(x = "Cholesterol level (mg/100ml)")  + myTheme
+```
+
+# Density plot
+
+We can substitute `geom_histogram()` from the previous code with `geom_density()` to create a density plot.
+
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center'}
+ggplot(combined.long.df, aes(x = Cholesterol)) +
+  geom_density()+
+  labs(x = "Cholesterol level (mg/100ml)")  + myTheme
+```
+
+# Density plot
+
+Transparency is controlled with the `alpha` argument
+
+```{r, fig.height=2, fig.width=4, warning=FALSE, fig.align='center'}
+ggplot(combined.long.df, aes(x = Cholesterol, fill = Age.group)) +
+  geom_density(alpha = .4)+
+  labs(x = "Cholesterol level (mg/100ml)")  + myTheme
+```
+
+
+# Bar chart
+```{r, fig.height=2.5, fig.width=4, warning=FALSE, fig.align='center', tidy = FALSE}
+ggplot(combined.df, aes(x = Age.group)) + geom_bar() + 
+  myTheme
+```
+
+#  Age group by Smoking group  
+```{r, fig.height=2, fig.width=5, warning=FALSE, fig.align='center'}
+ggplot(na.omit(combined.df[,c("Age.group", "Smoke.group")]),
+       aes(x = Age.group , fill = Smoke.group)) +
+      geom_bar() + myTheme
+```
+
+
+# Bar chart on proportions
+
+- The proportions add to 100% within each Smoke group (`group = Smoke.group`).
+
+```{r, eval=FALSE}
+g <- ggplot(na.omit(combined.df[,c("Age.group", "Smoke.group")]),
+  aes(x = Age.group, y = ..prop.., group = Smoke.group,
+      fill = Smoke.group))
+g + geom_bar() + myTheme
+```
+\vspace{-30pt}
+```{r, fig.height=2, fig.width=5, warning=FALSE, fig.align='center', echo = FALSE}
+g <- ggplot(na.omit(combined.df[,c("Age.group", "Smoke.group")]),
+  aes(x = Age.group, y = ..prop.., group = Smoke.group,
+      fill = Smoke.group))
+g + geom_bar() + myTheme
+```
+
+# Bar chart on proportions
+```{r, fig.height=2, fig.width=5, warning=FALSE, fig.align='center'}
+g + geom_bar(position = "dodge") +
+  labs( x = "Age group in years", y = "Percentage")+
+  myTheme
+```
+
+
+# `ggplot2` with `dplyr` 
+
+Create Bar chart of percentage of `Smoke.group` for each `Age.group`
+
+- Create two-way frequency table for `Age.group` and `Smoke.group`.
+- Create frequency table for `Age.group`.
+- Join these two tables and compute the percentage using `mutate()`
+- `geom_col()` plot the value in the final table.
+
+# `ggplot2` with `dplyr` 
+
+Create two-way frequency table for `Age.group` and `Smoke.group`.
+
+```{r}
+age.smoke.tab <-combined.df %>% 
+  filter(!is.na(Smoke.group)) %>%
+  group_by(Age.group, Smoke.group) %>% 
+  count()
+age.smoke.tab
+```
+
+# `ggplot2` with `dplyr` 
+
+Create frequency table for `Age.group`.
+
+```{r}
+age.tab <- 
+  combined.df %>% 
+  filter(!is.na(Smoke.group)) %>%
+  group_by(Age.group) %>% 
+  count() %>% 
+  rename(Total = n)
+age.tab
+```
+
+# `ggplot2` with `dplyr` 
+
+Join these two tables and compute the percentage using `mutate()`
+
+```{r}
+final.tab <- age.smoke.tab %>% 
+  left_join(age.tab) %>% mutate(Prop = n/Total)
+final.tab
+```
+
+# `ggplot2` with `dplyr` 
+
+`geom_col()` plot the value in the final table.
+
+```{r, fig.height=2, fig.width=5, warning=FALSE, fig.align='center'}
+ggplot(final.tab, aes(x = Age.group, y = Prop, 
+                      fill = Smoke.group)) +
+  geom_col()+ labs(x = "Age group in years", 
+                   y = "Percentage")+  myTheme
+```
+
+
+# Plot means in context
+
+```{r}
+combined.long.df %>% 
+  group_by(Age.group) %>% 
+  summarise(Mean = mean(Cholesterol, na.rm = TRUE))
+
+```
+
+
+- Means are all but meaningless unless they are presented in context.
+- Always present with standard deviations (SDs) or standard error of means (SE) or confidence intervals.
+- Plot means with 95% confidence intervals ($\pm$ 1.96 $\times$ SE).
+
+
+# Calculating 95\% CIs
+-  95\% CI $=$ Mean $\pm$ 1.96 $\times$ SE
+- Standard Errors $= \frac{\text{Standard Deviation}}{\sqrt{\text{Sample Size}}}$
+```{r}
+combined.long.df %>% 
+  group_by(Age.group) %>% 
+  summarise(Mean = mean(Cholesterol, na.rm = TRUE), 
+            SD = sd(Cholesterol, na.rm = TRUE))
+```
+
+
+# Calculating 95\% CIs
+```{r}
+combined.long.df %>% 
+  group_by(Age.group) %>% 
+  summarise(Mean = mean(Cholesterol, na.rm = TRUE), 
+            SD = sd(Cholesterol, na.rm = TRUE), 
+            N = sum(!is.na(Cholesterol)), 
+            SE =  SD/sqrt(N), 
+            CI.upr = Mean + 1.96 * SE, 
+            CI.lwr = Mean - 1.96 * SE)
+
+
+```
+
+# Calculating 95\% CIs
+```{r}
+age.tab <- 
+  combined.long.df %>% 
+    group_by(Age.group) %>% 
+    summarise(Mean = mean(Cholesterol, na.rm = TRUE), 
+              SD = sd(Cholesterol, na.rm = TRUE), 
+              N = sum(!is.na(Cholesterol)), 
+              SE =  SD/sqrt(N), 
+              CI.upr = Mean + 1.96 * SE, 
+              CI.lwr = Mean - 1.96 * SE)
+```
+
+
+# Error-bars
+
+```{r, eval=FALSE}
+ggplot(age.tab, aes(x = Age.group, y = Mean)) + geom_point() +
+     geom_errorbar(aes(ymax = CI.upr, ymin = CI.lwr),
+                   width = 0.1)+
+     xlab("Age Group")+
+     ylab("Cholesterol level (mg/100ml)") +
+  myTheme
+```
+
+# Error-bars
+
+```{r, echo=FALSE,  fig.align='center', fig.height=3, fig.width=4}
+ggplot(age.tab,fig.height=3, fig.width=5, aes(x = Age.group, y = Mean)) + geom_point() +
+     geom_errorbar(aes(ymax = CI.upr, ymin = CI.lwr),
+                   width = 0.1)+
+     xlab("Age Group")+
+     ylab("Cholesterol level (mg/100ml)") +
+  myTheme
+```
+
+
+# Any interaction between Gender and Age group?
+```{r}
+GA.tab <- 
+  combined.long.df %>% 
+    group_by(Age.group, Sex) %>% 
+    summarise(Mean = mean(Cholesterol, na.rm = TRUE), 
+              SD = sd(Cholesterol, na.rm = TRUE), 
+              N = sum(!is.na(Cholesterol)), 
+              SE =  SD/sqrt(N), 
+              CI.upr = Mean + 1.96 * SE, 
+              CI.lwr = Mean - 1.96 * SE)
+GA.tab
+```
+
+
+# Plotting mean $\pm$ 95% CI:
+```{r, warning=FALSE, fig.align='center', eval=FALSE}
+g <- ggplot(GA.tab, aes(x = Age.group, y = Mean,
+                  color = Sex)) +
+  xlab("Age Group")+
+  ylab("Cholesterol level (mg/100ml)")
+
+g + geom_point()+
+  geom_errorbar(aes(ymax = CI.upr, ymin = CI.lwr),
+                width = 0.1) +
+  myTheme
+
+```
+
+# Plotting mean $\pm$ 95% CI:
+```{r, fig.height=3, fig.width=5, warning=FALSE, fig.align='center', echo = FALSE}
+g <- ggplot(GA.tab, aes(x = Age.group, y = Mean,
+                  color = Sex)) +
+  xlab("Age Group")+
+  ylab("Cholesterol level (mg/100ml)")
+
+g + geom_point() +
+  geom_errorbar(aes(ymax = CI.upr, ymin = CI.lwr),
+                width = 0.1) +
+  myTheme
+```
+
+# Side-by-side? `position_dodge()`
+```{r, warning=FALSE, fig.align='center', eval=FALSE}
+dodge <- position_dodge(width=0.2)
+
+g + geom_point(position = dodge) +
+  geom_errorbar(aes(ymax = CI.upr, ymin = CI.lwr),
+                width = 0.1, position = dodge) +
+  myTheme
+```
+
+- `position_dodge()`, dodge overlapping objects side-to-side.  
+
+# Side-by-side `position_dodge()`
+```{r, fig.height=3, fig.width=5, warning=FALSE, fig.align='center', echo = FALSE}
+dodge <- position_dodge(width=0.2)
+
+g + geom_point(position = dodge) +
+  geom_errorbar(aes(ymax = CI.upr, ymin = CI.lwr),
+                width = 0.1, position = dodge) +
+  myTheme
+```
+
+# Flip ` coord_flip()`
+```{r, fig.height=3, fig.width=5, warning=FALSE, fig.align='center', echo = FALSE}
+dodge <- position_dodge(width=0.2)
+
+g + geom_point(position = dodge) +
+  geom_errorbar(aes(ymax = CI.upr, ymin = CI.lwr),
+                width = 0.1, position = dodge) + coord_flip() +
+  myTheme
+```
+
+# Connect the points? `geom_path()`
+```{r, warning=FALSE, fig.align='center', eval=FALSE}
+g + geom_point(position = dodge) +
+  geom_errorbar(aes(ymax = CI.upr, ymin = CI.lwr),
+                width = 0.1, position = dodge) +
+  geom_path(aes(x = as.numeric(Age.group)),
+            position = dodge) +
+  myTheme
+```
+
+- ` as.numeric()`: converts any **R** object into numbers. 
+
+```{r}
+GA.tab$Age.group
+```
+
+```{r}
+as.numeric(GA.tab$Age.group)
+```
+
+# Connect the points `geom_path()`
+```{r, fig.height=3, fig.width=5, warning=FALSE, fig.align='center', echo = FALSE}
+g + geom_point(position = dodge) +
+  geom_errorbar(aes(ymax = CI.upr, ymin = CI.lwr),
+                width = 0.1, position = dodge) +
+  geom_path(aes(x = as.numeric(Age.group)),
+            position = dodge) +
+  myTheme
+```
+
+#Save a ggplot
+```{r, eval=FALSE}
+ggsave("myplot.pdf")
+ggsave("myplot.png")
+
+ggsave("myplot.pdf", width = 4, height = 4)
+ggsave("myplot.pdf", width = 20, height = 20, units = "cm")
+```
+- Only save the last plot that you displayed. 
+- Saved in the current working directory. 
+- Detect the extention from the file name. 
+- The default unit is in inches.
+
+# Summary
+
+```{r, echo = FALSE, results = "asis"}
+data.frame(type = c("**Scatter plot**", "**Bar plot**",
+                    "**Histogram**", "**Density Plot**", 
+                    "**Box plot**", 
+                     "**Line plot**", "**Errorbar**"),
+           fun = c("`geom_point`", "`geom_bar`", 
+                   "`geom_histogram`", "`geom_density`", 
+                   "`geom_boxplot`",
+                    "`geom_path`", "`geom_errorbar`")) %>% 
+  kable(format = "markdown", 
+        col.names = c("Plot type", "`geom` Function"))
+```
+
+- `ggplot2` Documentation:
+[http://docs.ggplot2.org/current/](http://docs.ggplot2.org/current/)
+
+- cheatsheets:
+[https://www.rstudio.com/resources/cheatsheets/](https://www.rstudio.com/resources/cheatsheets/)
+
+

@@ -1,0 +1,105 @@
+
+
+\documentclass[12pt,a4paper]{article}
+\usepackage{amsmath}
+\usepackage{enumerate}
+\usepackage[cm]{fullpage}
+
+\begin{document}
+\setlength\parindent{0cm}
+%\setlength{\oddsidemargin}{0.25cm}
+%\setlength{\evensidemargin}{0.25cm}
+\title{\Large{\textbf{Introduction to \texttt{R}}}\\
+\textit{Session 2 exercises}}
+\author{Statistical Consulting Center}
+\date{18 November, 2013}
+\maketitle
+ 
+
+\section{Write your own function}
+\label{sec:func}
+\begin{enumerate}[(i)]
+  \item\label{itm:sefunc} A simple function  calculate the standard
+    error of the mean is given in the Session 2 slide, i.e.
+%\clearpage\newpage  
+  \begin{verbatim}
+  mystder <- function(x){
+       mysd <- sd(x, na.rm = T)
+       n <- length(x)
+       mysd/sqrt(n)
+  }
+  \end{verbatim}
+  Copy this code and paste it into your \texttt{R} script, submit it
+  to the \texttt{R} console. 
+  \item \label{itm:sfunc} Modify the function in
+    \ref{sec:func}(\ref{itm:sefunc})  
+    so that the output will have only 2 decimal places.
+  \item Calculate the standard error of mean \texttt{age} using the
+    function you've created in \ref{sec:func}(\ref{itm:sfunc}).
+\end{enumerate}
+
+
+\section{Installing an \texttt{R} package}
+\label{sec:pack}
+\texttt{R} packages are collections of user-defined functions. The function
+\texttt{std.error}, for example, is contained in the \texttt{plotrix} package.
+\begin{enumerate}[(i)]
+  \item Let's look at what happens when we try to use a function
+    before actually installing the package in which it is
+    contained. E.g. Calculate the standard error of the mean age using
+    \texttt{std.error}.  
+\item Install the package \texttt{plotrix} into your \texttt{R}
+  session by following the instructions below: 
+  \begin{enumerate}
+  \item Select \texttt{Packages} from the bottom right panel of your
+    Rstudio interface.
+  \item Click on \texttt{Install Packages} icon just below \texttt{Packages}.
+  \item Type \texttt{plotrix} in the blank space provided below
+    ``\texttt{Packages (separate multiple with space or comma):}''
+  \item Click on \texttt{No} if it asks you to restart \texttt{R}
+  \item Submit the code \texttt{library(plotrix)} to \texttt{R} Console
+    to complete this installation.
+  \end{enumerate}
+\item Now, use \texttt{std.error} to calculate the standard error of
+  the mean age. 
+\item Try writing your own code to calculate the standard error of the
+  mean age. Hint: This only requires one line of code. Use online resources
+if you cannot remember how the standard error is calculated.
+\end{enumerate}
+ 
+\section{Subsetting datasets}
+\label{sec:sub}
+\begin{enumerate}[(i)]
+\item \label{itm:1way} Produce a one-way frequency table for \texttt{q1a}.
+\item \label{itm:na} Find out which participants have chosen ``Can't
+  choose'' for this questions.
+\item Now produce the frequency table in
+  \ref{sec:sub}(\ref{itm:1way}), excluding those participants in
+  \ref{sec:sub}(\ref{itm:na}).
+\item Calculate the mean age for male participants.
+\item Calculate the mean age for male participants who make less than
+  \$10000 a year.
+\item Calculate the mean age for European male participants who make less than
+  \$10000 a year.
+\end{enumerate}
+ 
+
+\section{Challenge}
+\label{sec:cha}
+%Thue function given in \ref{sec:func} suppose to calculate the
+%standard error. Actually, it is only correct if the input does NOT
+%contain missing values. This is because the \texttt{length()} function
+%will count missing values as well. For example:
+%<<>>=
+%test <- c(1, 2, 3, 4, NA)
+%length(test)
+%@
+%It returns \Sexpr{length(test)}
+
+Modify the function given in \ref{sec:func}, so that the function will
+return a 95\% confidence interval. Hint: A 95\% confidence interval of
+a variable \texttt{x} is given by the mean of \texttt{x} $\pm$ 1.96
+$\times$ the
+standard error of \texttt{x}. You might find the \texttt{paste()}
+function useful.
+\end{document}

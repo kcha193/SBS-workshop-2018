@@ -1,0 +1,403 @@
+\documentclass{beamer}
+\newenvironment{changemargin}[2]{%
+\begin{list}{}{%
+\setlength{\topsep}{0pt}%
+\setlength{\leftmargin}{#1}%
+\setlength{\rightmargin}{#2}%
+\setlength{\listparindent}{\parindent}%
+\setlength{\itemindent}{\parindent}%
+\setlength{\parsep}{\parskip}%
+}%
+\item[]}{\end{list}}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{grffile}
+\usetheme{Madrid}
+\usecolortheme{beaver}
+\setbeamertemplate{navigation symbols}{}
+\titlegraphic{\includegraphics[width=5cm]{..//..//S-DS-VC-RGB.png}}
+%\logo{\includegraphics[width=0.1\textwidth,keepaspectratio]{..//..//UOACrest.png}}
+\author[SCC]{Statistical Consulting Centre}%\\
+\institute[\href{mailto:consulting@stat.auckland.ac.nz}
+  {consulting@stat.auckland.ac.nz}]{\href{mailto:consulting@stat.auckland.ac.nz}
+  {consulting@stat.auckland.ac.nz}\\
+%Statistical Consulting Centre\\
+The Department of Statistics\\
+The University of Auckland}
+\title[Session 7 -- Simple analysis]{NZSSN Courses: Introduction to \texttt{R}}
+\subtitle{Session 7 -- Simple analysis}
+\date{2 March, 2017}
+\begin{document}
+%\SweaveOpts{concordance=TRUE}
+\maketitle
+ 
+\begin{frame}[fragile]
+  \frametitle{Regression commands}
+<<echo = F>>=
+options(continue = " ")
+opts_chunk$set(comment=NA)
+issp.df = read.csv("../../Data/issp.csv", stringsAsFactors = F)
+gender.na <- which(issp.df$Gender == "NA, refused")
+issp.df$Gender[gender.na] = NA
+Q6.na <- which(issp.df$Q6 == "na, refused")
+issp.df$Q6[Q6.na] = NA
+issp.df$Q6 = factor(issp.df$Q6, levels = c("always wrong", "almost always wrong", "only sometimes wrong", "not wrong at all", "cant choose, dk"))
+Q7.na <- which(issp.df$Q7 == "na, refused")
+issp.df$Q7[Q7.na] <- NA
+issp.df$Q7 = factor(issp.df$Q7, levels = c("always wrong", "almost always wrong", "only sometimes wrong", "not wrong at all", "cant choose, dk"))
+Q8.na <- which(issp.df$Q8 == "na, refused")
+issp.df$Q8[Q8.na] <- NA
+issp.df$Q8 = factor(issp.df$Q8, levels = c("always wrong", "almost always wrong", "only sometimes wrong", "not wrong at all", "cant choose, dk"))
+Q1.na <- which(issp.df$Q1 == "na, refused" | issp.df$Q1 == "can't choose, dk")
+issp.df$Q1[Q1.na] <- NA
+issp.df$Q1 = factor(issp.df$Q1, 
+                    levels = c("strongly agree", 
+                    "agree", "neither agree nor dis", 
+                    "disagree", "strongly disagree"))
+issp.df$age.group = ifelse(issp.df$Age<=35, "Under 35", 
+                           ifelse(issp.df$Age <= 60, "36 to 60", "Over 61"))
+issp.df$age.group = factor(issp.df$age.group, 
+                           levels = c("Under 35", 
+                                      "36 to 60", 
+                                      "Over 61"))
+issp.df$Q2 <- ifelse(issp.df$Q2 == "cant choose, dk" | issp.df$Q2 == "na, refused", NA, issp.df$Q2)
+issp.df$Q2 = factor(issp.df$Q2, 
+                    levels = c("strongly agree", 
+                    "agree", "neither agree nor dis", 
+                    "disagree", "strongly disagree"))
+
+issp.df$Q3 <- ifelse(issp.df$Q3 == "cant choose, dk" | 
+                     issp.df$Q3 == "na, refused", 
+                     NA, issp.df$Q3)
+issp.df$Q3 = factor(issp.df$Q3, 
+                    levels = c("strongly agree", 
+                    "agree", "neither agree nor dis", 
+                    "disagree", "strongly disagree"))
+issp.df$Q4 <- ifelse(issp.df$Q4 == "cant choose, dk" | 
+                     issp.df$Q4 == "na, refused", 
+                     NA, issp.df$Q4)
+issp.df$Q4 = factor(issp.df$Q4, 
+                    levels = c("strongly agree", 
+                    "agree", "neither agree nor dis", 
+                    "disagree", "strongly disagree"))
+Q1.lik <- as.numeric(issp.df$Q1)
+Q2.lik <- as.numeric(issp.df$Q2)
+Q3.lik <- as.numeric(issp.df$Q3)
+Q4.lik <- as.numeric(issp.df$Q4)
+total.lik <- Q1.lik + Q2.lik + Q3.lik + Q4.lik
+scale.df <- data.frame(cbind(Q1.lik, Q2.lik, Q3.lik, Q4.lik, total.lik))
+issp.df$Income <- ifelse(issp.df$Income 
+                         == "NAV; NAP No own income",
+                         NA, issp.df$Income)
+issp.df$total.lik <- scale.df$total.lik
+issp.df$Q5 = with(issp.df, ifelse(Q5 == "can t choose, dk" 
+                          | Q5 == "NA, refused", NA, Q5))
+@
+Two of the most commonly used \texttt{R} commands for modeling:
+  \begin{itemize}
+  \item \texttt{lm()}: fits \textbf{L}inear \textbf{M}odels
+  \item \texttt{glm()}: fits \textbf{G}eneralised \textbf{L}inear
+    \textbf{M}odels.\\\vspace{0.5cm}
+
+  Note SAS users: \texttt{PROC GLM} is \textbf{not} the same
+  as \texttt{R}'s \texttt{glm()}.
+  \end{itemize}
+\vspace{5mm}
+There's a lot in these two commands; entire stage 3 statistical courses on linear and generalised linear models.
+\end{frame} 
+
+\begin{frame}[fragile]
+  \frametitle{Student's $t$-test}
+  \begin{center}
+  \texttt{t.test(y $\sim$ x)}
+  \end{center}
+  \begin{itemize}
+  \item \texttt{y}: values; e.g., \texttt{total.lik, Q1.lik, Age}, etc.
+  \item \texttt{x}: group; e.g., \texttt{Gender, Q5} (\texttt{obedient} or \texttt{think themselves}).
+  \end{itemize}
+Suppose we want to test whether males and females (\texttt{x = Gender}) have different total scores across \texttt{Q1} -- \texttt{Q4} (\texttt{y = total.lik}).\\\vspace{0.3cm}
+Categorical variables should be converted to type \texttt{factor} before analysis, i.e.
+<<results='hide'>>=
+issp.df$Gender <- factor(issp.df$Gender)
+with(issp.df, t.test(total.lik~Gender))
+@
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Student's $t$-test}
+<<echo = F>>=
+with(issp.df, t.test(total.lik~Gender))
+pval <- signif(with(issp.df, t.test(total.lik~Gender))$p.value,4)
+@
+<<echo = F,results='hide'>>=
+t1 <- with(issp.df, t.test(total.lik~Gender))
+t1
+@
+\begin{itemize}
+\item The estimated difference in total score between females and males is \Sexpr{round(t1$estimate[1],2)} $-$ \Sexpr{round(t1$estimate[2],2)} = \Sexpr{round(abs(diff(t1$estimate)), 2)}.
+\item \texttt{p}-value = \Sexpr{pval}, i.e. we have extremely strong evidence that the mean total score are statistically significantly different.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Student's $t$-test}
+<<echo = F>>=
+t1 <- with(issp.df, t.test(total.lik~Gender))
+t1
+@
+\begin{itemize}
+\item While we have statistical significance, we should note that the sample sizes are very large.
+\item Is the observed difference significant from a social scientist's perspective?
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Multiple comparisons}
+Let's compare the total score between three age groups, i.e.
+\begin{enumerate}
+\item Do a $t$-test between "Under 35" and "36 to 60".
+\item Do a $t$-test between "Under 35" and "Over 61".
+\item Do a $t$-test between "36 to 60" and "Over 61".
+\end{enumerate}
+\begin{center}
+\huge{Really?}
+\end{center}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Error rate}
+When we do a $t$-test comparing mean total score between females and males, the null hypothesis is that the mean total score for females is the same as that for males. The $t$-test is performed (with the hope) to reject this null hypothesis.\\
+
+In order to come up with a p-value, we \emph{assume} that $\alpha$
+(typically 5\%) of the time, we will reject the null hypothesis when
+it's actually true, i.e., we assume 5\% of the time we will make a mistake.
+
+\begin{itemize}
+\item When we do two simultaneous $t$-tests, about 10\% of the time we will make a mistake.
+\item When we do three simultaneous $t$-tests, about 15\% of the time we will make a mistake.
+\item The chance of being shot in Russian Roulette is 16.67\%. Would
+  you risk it then?
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{\textit{\textbf{An}}alysis \textit{\textbf{o}}f \textit{\textbf{Va}}riance (ANOVA)}
+Generalises $t$-test to more than two groups.\\
+\vspace{2mm}
+Null hypothesis: all group means are equal.\\
+\vspace{2mm}
+{\bf Example.} Mean total score is the same for all three age.groups.
+<<>>=
+tryaov <- with(issp.df, aov(total.lik~age.group))
+@
+\begin{itemize}
+\item \texttt{aov()}: \textbf{A}nalysis \textbf{o}f \textbf{V}ariance.
+\item Response variable (i.e. \texttt{total.lik}) is separated by
+  \texttt{\~} from explanatory variable(s) (i.e. \texttt{age.group}).
+\item All explanatory variables should be categorical (otherwise it's
+  not ANOVA).
+\end{itemize} 
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{\texttt{aov()}}
+<<>>=
+summary(tryaov)
+@
+We have extremely strong evidence that at least one age group's mean total score is different to that of the other age groups.\\\vspace{0.3cm}
+
+Which one(s) is(are) different????
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Which one(s)?}
+<<size = "small">>=
+model.tables(tryaov, "means")
+@
+<<echo = F>>=
+m <- round(model.tables(tryaov, "means")$tables$'Grand mean', 1)
+gm <- round(model.tables(tryaov, "means")$tables$age.group, 1)
+@
+The mean total score...
+\begin{itemize}
+\item over all participants is \Sexpr{m}.
+\item for ``Under 35'' group is higher than both that of the ``36 to 60'' and the ``Over 61'' groups.
+\item for "36 to 60" group is higher than the "Over 61" group.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Which one(s)?}
+<<>>=
+model.tables(tryaov, "means")
+@
+<<echo = F>>=
+m <- round(model.tables(tryaov, "means")$tables$'Grand mean', 1)
+gm <- round(model.tables(tryaov, "means")$tables$age.group, 1)
+@
+\begin{itemize}
+\item Are any pairs of these means statistically different from one another?
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Post-hoc multiple comparisons}
+<<size = "small">>=
+TukeyHSD(tryaov)
+@
+\begin{itemize}
+\item \texttt{diff}: estimated difference between two group means.
+\item \texttt{lwr, upr}: lower and upper limit of the 95\% confidence interval of the estimated difference.
+\item \texttt{p adj}: \texttt{p}-values adjusted for multiple comparisons.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Post-hoc multiple comparisons}
+<<echo = FALSE, size = "small">>=
+comp <- TukeyHSD(tryaov)
+comp$age.group
+@
+\begin{itemize}
+\item Mean total score for ``36 to 60'' is \Sexpr{abs(round(comp$age.group[1, 1], 1))} units (on the likert scale) \emph{lower} than ``Under 35'' (\texttt{p adj} $<$ 0.0001).
+\item Mean total score for ``Over 61'' is \Sexpr{abs(round(comp$age.group[2, 1], 1))} units \emph{lower} than ``Under 35'' (\texttt{p adj} $<$ 0.0001).
+\item Mean total score for ``Over 61'' is \Sexpr{abs(round(comp$age.group[3, 1], 1))} units \emph{lower} than ``36 to 60'' (\texttt{p adj} $<$ 0.0001).
+\end{itemize}
+\end{frame}
+ 
+
+\begin{frame}
+  \frametitle{From Session 6: Mean total score vs Age group}
+\begin{center}
+  Mean $\pm$ 1.96 $\times$ SEM
+\end{center}
+<<scat1, fig.align = 'center', out.width='0.6\\linewidth', echo = FALSE>>=
+pp <- data.frame(comp$age.group)
+pp$age.group <- factor(rownames(comp$age.group))
+
+library(ggplot2)
+ggplot(pp, aes(x = age.group, y = diff)) + geom_point() + geom_errorbar(aes(ymax = upr, ymin = lwr))
+@
+\end{frame} 
+
+
+\begin{frame}[fragile]
+  \frametitle{Two-way ANOVA}
+\begin{itemize} 
+\item \texttt{tryaov} was fitted using one categorical explanatory variable (\texttt{age.group}). We therefore refer to its ANOVA table as \emph{one-way}.
+\item If we fit a linear model using two categorical explanatory variables, we have a \emph{two-way} ANOVA.
+\item Recall: All categorical variables should be converted into factors.
+<<tidy = F>>=
+issp.df$Gender <- factor(issp.df$Gender)
+try2way <- with(issp.df, 
+                aov(total.lik~Gender*age.group))
+@
+\item \verb|Gender*age.group| is equivalent to \verb|Gender + age.group + Gender:age.group|.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Two-way ANOVA}
+<<>>=
+summary(try2way)
+@
+There is no two-way interaction between \texttt{Gender} and \texttt{age.group} ($p$-value = 0.19), i.e., the magnitude of the difference in mean total score between males and females is constant across all age groups, and vice versa.
+\end{frame} 
+
+
+\begin{frame}[fragile]
+  \frametitle{Two-way ANOVA}
+<<>>=
+summary(try2way)
+@
+We have extremly strong evidence that:
+\begin{itemize}
+\item the mean total score of {\em at least one} age group differs from the others, and
+\item mean total score differs between males and females.
+\end{itemize}
+\end{frame} 
+
+\begin{frame}[fragile]
+  \frametitle{Estimated means}
+<<>>=
+model.tables(try2way, "means")
+@
+\end{frame} 
+
+
+\begin{frame}[fragile]
+  \frametitle{Post-hoc pairwise comparisons}
+<<>>=
+TukeyHSD(try2way)
+@
+\end{frame} 
+ 
+%\begin{frame}[fragile]
+%  \frametitle{Linear regression}
+%<<fig.align ='center', out.width = '0.8\\textwidth', echo = F>>=
+%with(issp.df, plot(Age, total.lik))
+%@
+%\end{frame} 
+
+\begin{frame}[fragile]
+  \frametitle{Test of independence}
+<<>>=
+Q5.age.tab <- with(issp.df, table(Q5, age.group))
+Q5.age.tab
+@
+Do opinions on preparing children for life depend on age group? Statistically speaking, is \texttt{Q5} (the variable) and \texttt{age.group} independent of one another?
+\end{frame} 
+
+\begin{frame}[fragile]
+  \frametitle{Pearson's Chi-squared test}
+<<>>=
+chisq.test(Q5.age.tab)
+@
+\begin{itemize}
+\item There is extremely strong evidence (\texttt{p}-value $<$ 0.0001) that \texttt{Q5} and \texttt{age.group} are not independent of one another.
+\item Opinions on preparing children for life depend on the age group to which respondents belong.
+\end{itemize}
+\end{frame} 
+
+
+\begin{frame}[fragile]
+  \frametitle{Assumptions}
+\begin{itemize}
+\item Pearson's Chi-squared tests have certain assumptions. Beyond the scope of this course.
+\item \texttt{chisq.test()} will give you a warning if these assumptions are not met.
+<<echo = F, results ='hide'>>=
+mytest = 1:4
+chisq.test(mytest)
+@
+\item These assumptions are more likely to be wrong if the sample size is small.
+\item If this happens, the alternative is to use Fisher's exact test.
+\end{itemize}
+\end{frame} 
+
+\begin{frame}[fragile]
+  \frametitle{Fisher's exact test}
+Assume \texttt{Q5.age.tab} does not meet the underlying assumptions of Pearson's Chi-squared test.
+<<>>=
+fisher.test(Q5.age.tab)
+@
+\end{frame} 
+
+\begin{frame}[fragile]
+  \frametitle{Summary}
+  \begin{itemize}
+  \item Student's $t$-test
+  \item One-way ANOVA
+  \item Two-way ANOVA
+  \item Pearson’s Chi-squared test
+  \item Fisher’s exact test
+  \end{itemize}
+\end{frame}
+
+\end{document}     

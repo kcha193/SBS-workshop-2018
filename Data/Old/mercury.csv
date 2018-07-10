@@ -1,0 +1,54 @@
+ID,Lake,pH,Calcium,Chlorophyll,Avg_Mercury
+1,Alligator,6.1,Low,0.7,1.23
+2,Annie,5.1,Low,3.2,1.33
+3,Apopka,9.1,High,128.3,0.04
+4,Blue Cypress,6.9,Medium,3.5,0.44
+5,Brick,4.6,Low,1.8,1.2
+6,Bryant,7.3,Low,44.1,0.27
+7,Cherry,5.4,Low,3.4,0.48
+8,Crescent,8.1,High,33.7,0.19
+9,Deer Point,5.8,Medium,1.6,0.83
+10,Dias,6.4,Low,22.5,0.81
+11,Dorr,5.4,Low,14.9,0.71
+12,Down,7.2,Medium,4,0.5
+13,Eaton,7.2,High,11.6,0.49
+14,East Tohopekaliga,5.8,Medium,5.8,1.16
+15,Farm-13,7.6,High,71.1,0.05
+16,George,8.2,High,78.6,0.15
+17,Griffin,8.7,High,80.1,0.19
+18,Harney,7.8,High,13.9,0.77
+19,Hart,5.8,Low,4.6,1.08
+20,Hatchineha,6.7,Medium,17,0.98
+21,Iamonia,4.4,Low,9.6,0.63
+22,Istokpoga,6.7,Medium,9.5,0.56
+23,Jackson,6.1,Low,21,0.41
+24,Josephine,6.9,Medium,32.1,0.73
+25,Kingsley,5.5,Medium,1.6,0.34
+26,Kissimmee,6.9,Medium,21.5,0.59
+27,Lochloosa,7.3,Medium,24.7,0.34
+28,Louisa,4.5,Low,7,0.84
+29,Miccasukee,4.8,Low,14.8,0.5
+30,Minneola,5.8,Low,0.7,0.34
+31,Monroe,7.8,High,43.8,0.28
+32,Newmans,7.4,Medium,32.7,0.34
+33,Ocean Pond,3.6,Low,3.2,0.87
+34,Ocheese Pond,4.4,Low,3.2,0.56
+35,Okeechobee,7.9,High,16.1,0.17
+36,Orange,7.1,Medium,45.2,0.18
+37,Panasoffkee,6.8,High,16.5,0.19
+38,Parker,8.4,High,152.4,0.04
+39,Placid,7,Low,12.8,0.49
+40,Puzzle,7.5,High,20.1,1.1
+41,Rodman,7,High,6.4,0.16
+42,Rousseau,6.8,High,6.2,0.1
+43,Sampson,5.9,Medium,1.6,0.48
+44,Shipp,8.3,High,68.2,0.21
+45,Talquin,6.7,High,24.1,0.86
+46,Tarpon,6.2,Medium,9.6,0.52
+51,Tohopekaliga,6.2,Medium,27.7,0.65
+47,Trafford,8.9,Medium,9.6,0.27
+48,Trout,4.3,Low,6.4,0.94
+49,Tsala Apopka,7,Medium,4.6,0.4
+50,Weir,6.9,Medium,16.5,0.43
+52,Wildcat,5.2,Low,2.6,0.25
+53,Yale,7.9,Medium,8.8,0.27

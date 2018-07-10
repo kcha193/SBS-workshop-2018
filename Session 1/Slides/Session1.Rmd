@@ -1,0 +1,485 @@
+---
+title: "Introduction to **R**"
+subtitle: "Session 1 -- Introduction"
+date:  |
+  | `r readLines('../../metadata.txt')[2]`
+output:
+  beamer_presentation:
+    theme: "Madrid"
+    colortheme: "crane"
+    fonttheme: "professionalfonts"
+    highlight: tango
+    fig_width: 7
+    fig_height: 6
+    fig_caption: true
+    keep_tex: true
+    includes:
+      in_header: ../../header.tex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, tidy = TRUE)
+options(width = 50)
+library(tidyverse)
+library(knitr)
+```
+
+# Monday
+Each session comprises two parts: lecture and practice.
+```{r, echo = FALSE, results = "asis"}
+tibble(Session = c("1", "", "2", "", 
+                   "3", "", "4"),
+    Time = c("09:00am - 10:30am",
+             "10:30am - 11:00am",
+             "11:00am - 12:30pm",
+             "12:30pm - 01:30pm",
+             "01:30pm - 03:00pm",
+             "03:00pm - 03:30pm",
+             "03:30pm - 05:00pm"),
+    Topic = c("Introduction and Data Import",
+              "Break",
+              "Descriptive statistics",
+              "Lunch break",
+              "Basic R programming",
+              "Break",
+              "Advanced R programming")) %>% 
+  kable(format = "markdown", align = c("lll")) 
+```
+
+
+
+# Tuesday
+
+Each session comprises two parts: lecture and practice.
+
+```{r, echo = FALSE, results = "asis"}
+tibble(Session = c("1", "", "2", "", 
+                   "3", "", "4"),
+    Time = c("09:00am - 10:30am",
+             "10:30am - 11:00am",
+             "11:00am - 12:30pm",
+             "12:30pm - 01:30pm",
+             "01:30pm - 03:00pm",
+             "03:00pm - 03:30pm",
+             "03:30pm - 05:00pm"),
+    Topic = c("Graphics",
+              "Break",
+              "Advanced Graphics (ggplot2)",
+              "Lunch break",
+              "Basic analysis",
+              "Break",
+              "Advanced analysis (R Markdown)")) %>% 
+  kable(format = "markdown", align = c("lll")) 
+```
+
+
+# What is **R**?
+
+> **R** is a free software environment for statistical computing and graphics
+
+- Created by Ross Ihaka and Robert Gentleman of the Department of Statistics, University of Auckland.
+- First version was made available in 1995.
+- Has become one of the most popular environments for statistical computing and data science.
+- We have three members of the ***R** Development Core Team* in the Department of Statistics.
+
+\center ![](..//..//S-DS-VC-RGB.png){#id .class width=5cm}
+
+ 
+# Why is **R** so popular?
+- It is open-source (FREE)!
+- It is powerful:
+    
+    + Can handle large and complex data sets.
+    + Easily program complex simulations.
+    + Can be used on High-Performance Computing Cluster.
+    + Graphics (much more flexible than SAS, SPSS, JMP, etc.)
+    
+- Well-support (Stack Overflow, R-Bloggers) from communities of different fields, i.e. **R** packages. https://cran.r-project.org/web/views/. 
+- It is flexible (your problem can likely be handled in **R**).
+- It runs well on many operating systems (Windows, Mac, and Linux).
+
+\centering You don't need to be a programmer to use **R**!
+
+# **R** and the biological sciences
+
+- Many applications of statistical methods to biological datasets are implemented in **R**.
+- These **R** *packages* are publically available on the web for immediate download and use:
+      
+      - `Bioconductor`, https://www.bioconductor.org/
+      - E.g. Next Generation Sequencing, Genomics.
+
+\centering You don't need to be a programmer to use **R**!
+
+
+# What is **R**? (IEEE Spectrum’s ranking 2017)
+
+\center ![](Figure\ranking 2017.png){} 
+
+# **R** and UoA's Department of Statistics
+
+> If you want to learn **R**, you are talking to the right people!
+
+\center ![](Figure\groupNew.jpg){#id .class width=250px} 
+
+# Statistical Consulting Centre
+
+The School of Biological Sciences (SBS) has a contract with the Statistical Consulting Centre to provide statistical support to staff and postgraduate students of SBS. 
+
+https://www.stat.auckland.ac.nz/consulting/meet-us/any1_uoa/appointment_scheduler_kevin
+
+\center ![](Figure\sbs booking.png){#id .class width=250px} 
+
+
+# How to download and install **R** (and **R**Studio)
+
+1. Go to https://cran.stat.auckland.ac.nz.
+2. Download the version relevant to your OS (Linux / Mac [(link)](https://medium.com/@GalarnykMichael/install-r-and-rstudio-on-mac-e911606ce4f4) / Windows).
+3. Install it on your computer.
+
+We *strongly* recommend using the **R** editor called **R**Studio.
+
+- Download and install it from https://www.rstudio.com/download.
+- UOA: Both softwares can be installed in the *Software Center*. 
+- Great for beginners and advanced use**R**s!
+
+## Reasons to use RStudio
+- Writing better code faster with **R**. 
+- Producing reports (**R** markdown). 
+- Producing interactive reports/tools (Shiny).
+- Developing **R** packages.
+
+# **R**studio
+
+-  Now open **R**studio 
+
+\center ![](Figure\rstudio.png){#id .class width=8cm} 
+
+- Then open an **R** script by clicking File $\rightarrow$ New $\rightarrow$ **R** script to show the **Source** pane.
+
+# **R**studio Project
+
+- Divide your work into multiple contexts. 
+- Each with their own 
+
+      + **working directory** (grey letters at the top of the Console), 
+      + **workspace** (never save this), 
+      + **history**, and 
+      + **source documents** (**R** code).
+      
+- Cross-platform on different OS (Linux / Mac / Windows)
+
+## Now create an **R**studio project for this workshop
+1. Go to File $\rightarrow$ "New Project", 
+2. Choose "Existing directory", 
+3. Click browse button to click **into** the folder "Rwrkshop SBS 2018", and 
+4. Press "open".
+
+# Using **R** as a calculator
+
+Again open an **R** script by clicking File $\rightarrow$ New $\rightarrow$ **R** script and type and **run (Ctrl + Enter)** the following in the **Source** pane. 
+
+```{r, echo=TRUE}
+1 + 2
+
+1 + 3^2
+
+log(15) - sqrt(3.4)
+
+pnorm(1.96)
+
+# This is a comment and is not evaluated
+```
+
+# Variable assignment
+
+- `<-` is the "assign to" operator, made up of `<` and `-` without a space.
+- E.g., `x <- 2` is read as "The value 2 is assigned to the object `x`".
+
+```{r, echo = TRUE, tidy = TRUE}  
+x <- 2
+y <- 3
+x^2 - 3*y + 5
+```
+
+-  You can also use `=` instead `<-`.
+
+```{r, echo = TRUE, tidy = TRUE}  
+x = 2
+y = 3
+x^2 - 3*y + 5
+```
+
+Note that **R** is **case-sensitive**
+
+```{r, error = TRUE}
+X
+```
+
+
+# Getting help
+- Google!
+
+    + "How to calculate the average in **R**?"
+    + The search results tell you that the `mean()` function is useful.
+- Quick-**R**: https://www.statmethods.net/
+- **R**-Bloggers: https://www.r-bloggers.com/
+- Stack Overflow: https://stackoverflow.com/questions/tagged/r
+- Books:
+    
+    + The **R** Book, by Michael J. Crawley. 
+    + **R** for Data Science, by Hadley Wickham, Garrett Grolemund. http://r4ds.had.co.nz/ 
+
+
+# Getting help -- in **R** 
+- `?`
+    
+    For example, `?mean` brings up the help file for the `mean()` function. It will tell you almost everything you need to know to use `mean()`.
+
+- `??`
+    
+    For example, `??mean` searches for everything related to "mean" in all the **R** packages installed on your computer.
+
+- `RSiteSearch("mean")`
+
+    Searches everything on CRAN (an online repository of **R** packages). This requires interenet connection.
+
+# **R** documentation
+
+\center ![](Figure\mean function.png)
+
+
+# Basic principles for data organisation in spreadsheets
+
+> Whatever you do, do it consistently.
+
+Use consistent:
+
+- codes for categorical variables (not M, Male, and male).
+- codes for missing values (can use NA or leave blank).
+
+    + Do not use a numeric value (999).
+
+- variable names in all files (glucose_10wk, Gluc10wk)
+- subject identifiers (mouse153, M153, 153)
+- date formats (YYYY-MM-DD, YY/DD/MM)
+
+Also, be careful about spaces within cells. A blank cell is different to a cell with a space in, and "Male" is different to "&#160;Male".
+
+# Basic principles for data organisation in spreadsheets
+
+> It is worth putting some time and thought into picking good names for things
+
+In general: 
+
+- Do not use spaces in variable (column) names or file names.
+
+    + Use underscores or hyphens instead (but not both).
+
+- Avoid special characters ($, @, %, #, &, (, ), !, /, etc.).
+- Never use "final" in the file name.
+- Use **short** but *meaningful* names.
+
+# Basic principles for data organisation in spreadsheets  
+
+- Put just one thing in a cell (i.e. separate lat, lon columns).
+- Make it a rectangle:
+
+    + Rows corresponding to subjects (or observations).
+    + Columns corresponding to variables.
+    + Do not scatter tables around a worksheet.
+    
+- Create a data dictionary.
+- No calculations in the raw data files.
+- Do not use font colour or highlighting as data.
+- Save the data in plain text files (i.e. a CSV).
+- Make backups (or use a version control system).
+
+# Basic principles for data organisation in spreadsheets
+
+> Do not overwrite original data files!
+
+\center ![](Figure\dont_overwrite_original.png){} 
+
+# Getting data into **R**
+
+- Always set a working directory using `setwd()`, this can be a directory where you store the data and/or outputting the results.   
+
+      + Ignore this if you are using the **R**studio project.
+      + Grey text under the "Console" tab.
+   
+- Use `read.csv()` to read a CSV file into **R**.
+- `dim()`: Returns the number of observations (rows) and variables (columns).
+- `head()`/`tail()`: Returns the first/last 6 rows of a data set.
+- `str()`: Returns the structure of the dataset, e.g., dimension, column names, type of data object, first few values of each variable.
+- `names()`: Returns the names of the variables contained in a dataset.
+
+
+# CSV file containing patient information 
+
+The patient CSV file has 7 variables:
+
+- `Patient.ID`: Identification Number.
+- `Age`: in years
+- `Sex`: 0 = Female, 1 = Male
+- `Race`: 1 = Caucasian, 2 = African, 3 = Other
+- `Weight`: in pounds
+- `Height`: in inches
+- `Smoke`: 1 = Yes, 2 = No
+
+# Getting data into **R**
+```{r, eval=FALSE, echo = TRUE}
+# setwd("your working directory")
+patient.df <- read.csv("Data/Patient.csv")
+head(patient.df)
+```
+
+```{r, eval=TRUE, echo = FALSE}
+patient.df <- read.csv("..\\..\\data\\Patient.csv")
+head(patient.df)
+```
+
+> You can use  1 forwardslash (`/`) or 2 backslashes (`\\`). 
+
+```{r, eval=FALSE, echo = TRUE}
+# setwd("your working directory")
+patient.df <- read.csv("Data\\Patient.csv")
+```
+
+> Tip: use "Tab" key to choose to files in `read.csv()` function, within the quotation (`""`).
+
+
+# Check the variable names
+
+```{r, eval=TRUE, echo = TRUE}
+#Names of the variables
+names(patient.df)
+```
+
+- Anything following the `#` symbol is treated as a comment and ignored by **R**.
+- Writing comments/documentation is a very good habit to develop, emphasis on *why*. 
+
+
+# \texttt{dim()} and \texttt{str()}
+```{r}
+dim(patient.df)
+str(patient.df)
+```
+
+Note that **character** vector, `Sex`, is automatically converted to **factor**.
+
+# Reading data into **R**
+```{r, eval=FALSE, echo = TRUE, tidy = FALSE}
+patient.df <- read.csv("Data/Patient.csv", 
+                       stringsAsFactors = FALSE)
+str(patient.df)
+```
+
+```{r, eval=TRUE, echo = FALSE}
+patient.df <- read.csv("..\\..\\Data\\Patient.csv", stringsAsFactors = FALSE)
+str(patient.df)
+```
+
+## `stringsAsFactors`
+`stringsAsFactors` argument is set to `FALSE`, so **character** vectors are not converted to **factor** vectors. We will explain factor in Session 3. 
+
+
+# Different types of data objects in **R**
+
+**R** has 6 different types of object:
+
+- `character` (alphanumeric; `"hello world"`), e.g. `Sex`
+- `numeric` (real or decimal; `3.14159`), e.g. `Weight`, `Height` and `Smoke`.
+- `integer` (whole numbers; `256`), e.g. `Patient.ID`, `Age`, `Race`.
+- `logical` (`TRUE` (`T`) or `FALSE` (`F`)), e.g.
+```{r}
+1 == 1
+2 <= 0
+3 != 2
+```
+- `factor` (numeric or alphanumeric, treated as categorical)
+- `complex` (numbers with imaginary components; `3i`)
+
+# Vectors
+
+- Use `c()` to combine multiple elements separated by comma's.
+- A *vector* is a combination of multiple elements of the same object type in 1 dimension (a one-dimensional array).
+
+```{r}
+# A character vector contains strings
+c("hello", "world")
+
+# A numeric vector contains numbers
+c(1, 2, 3, 4, 5, 6)
+
+# We can easily produce sequences using ':'
+1:6
+```
+
+# Matrices
+
+- Use `matrix()` to create a matrix in **R**.
+- A *matrix* is a combination of multiple elements of the same data type in 2 dimensions (a 2-dimensional array).
+
+```{r}
+# Create a matrix with 2 rows
+matrix(1:6, nrow = 2)
+
+# Create a matrix with 2 columns
+matrix(1:6, ncol = 2)
+```
+
+# Data frames
+
+- Use `data.frame` to create a data frame in **R**.
+- A *data frame* is a collection of multiple vectors (as different columns) that can be different types.
+
+```{r}
+my_characters = c("one", "two", "three")
+my_numbers = 1:3
+my_logicals = c(TRUE, FALSE, F)
+
+data.frame(my_characters, my_numbers, my_logicals)
+```
+
+# General Tips (Hotkeys)
+
+```{r, echo = FALSE, results = "asis"}
+tibble(
+   Hotkeys = c("Ctrl+Enter",
+             "Ctrl+Shift+A",
+             "Ctrl+Shift+C",
+             "Tab",
+             "Ctrl+l",
+             "Esc",
+             "Ctrl+Shift+F10",
+             "Ctrl+Up",
+             "Alt+Shift+K"),
+   Description = c("Run Selected Line(s) of code in the Source pane",
+              "Tidy Selected Line(s) of code in the Source pane",
+              "Comment Selected Line(s) of code in the Source pane",
+              "Complete code in Source or Console pane",
+              "Clean the screen the to Console pane",
+              "Kill the current operation",
+              "Restart **R** (Unload all the loaded **R** packages)",
+              "Popup History",
+              "Show all Hot keys")) %>% 
+  kable(format = "markdown", align = c("lll")) 
+```
+
+# Common Mistakes
+
+- Spelling, inculding the upper/lower cases. 
+- Matching parentheses/brackets and quotation symbols. 
+
+
+# Summary
+- Quick introduction to **R** and RStudio
+- Spreadsheet guidelines
+- Getting data into **R**
+
+
+
+
+
+
+

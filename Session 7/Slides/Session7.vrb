@@ -1,0 +1,17 @@
+\frametitle{Summary}
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+Model & Function\tabularnewline
+\midrule
+\endhead
+\textbf{Student's t-test} & \texttt{t.test()}\tabularnewline
+\textbf{One-way ANOVA} & \texttt{aov()}\tabularnewline
+\textbf{Two-way ANOVA} & \texttt{aov()}\tabularnewline
+\textbf{Pearson's Chi-square test} &
+\texttt{chisq.test()}\tabularnewline
+\textbf{Fisher's exact test} & \texttt{fisher.test()}\tabularnewline
+\textbf{Linear regression} & \texttt{lm()}\tabularnewline
+\bottomrule
+\end{longtable}
+

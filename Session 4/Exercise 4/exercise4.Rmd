@@ -1,0 +1,203 @@
+---
+title: "Introduction to **R**"
+subtitle: "Session 4"
+author: "Statistical Consulting Centre"
+date:  |
+  | `r readLines('../../metadata.txt')[2]`
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = FALSE, eval = FALSE)
+library(dplyr)
+library(tidyr)
+
+load("../../RData/Ex4.RData")
+
+
+```
+
+
+# 1. `for` loop
+
+1. Check the one-way frequency tables of pHtype and Calcium.
+
+```{r}
+for (i in c("pHtype", "Calcium")){
+  print(i)
+  print(table(joined.df[,i]))
+}
+```
+
+
+2. Calculate the means and standard deviations of pH, Chlorophyll and mercury measuremnts at Day 1, 2, and 3. 
+
+```{r}
+for (i in c("pH", "Chlorophyll", "Day1", "Day2", "Day3")){
+  print(i)
+  print(mean(joined.df[,i], na.rm = TRUE))
+  print(sd(joined.df[,i], na.rm = TRUE))
+}
+```
+
+
+# 2. `apply()` and `tapply()` functions
+
+1. Check the one-way frequency tables of `pHtype` and `Calcium`.
+
+```{r}
+apply(joined.df[, c("pHtype", "Calcium")], 2, table)
+
+```
+
+2. Calculate the means and standard deviations of `pH`, `Chlorophyll` and mercury measurements at Day 1, 2, and 3 using `apply()`.
+
+```{r}
+apply(joined.df[, c("pH", "Chlorophyll", "Day1", "Day2", "Day3")], 2, mean, na.rm=TRUE)
+
+apply(joined.df[, c("pH", "Chlorophyll", "Day1", "Day2", "Day3")], 2, sd, na.rm=TRUE)
+
+```
+
+3. Now calculate the means and standard deviations of pH, Chlorophyll and mercury to only 2 decimal places using `apply()`.
+
+```{r}
+round(apply(joined.df[, c("pH", "Chlorophyll", "Day1", "Day2", "Day3")], 2, mean, na.rm = TRUE), 2)
+
+round(apply(joined.df[, c("pH", "Chlorophyll", "Day1", "Day2", "Day3")], 2, sd, na.rm = TRUE), 2)
+
+```
+
+4. How many non-missing values are there in each of the variables, in `joined.df`?
+
+```{r}
+
+apply(joined.df[, -c(1,2)], 2, function(x) sum(!is.na(x)))
+
+```
+
+
+5. You were introduced to the following function, `mytab()`, in the Session 4 lecture slides.
+
+
+`````
+mytab <- function(someinput){
+  n <- length(someinput)
+  n.missing <- na.check(someinput)
+  n.complete <- n - n.missing
+  mymean <- round(mean(someinput, na.rm = TRUE), 2)
+  mysd <- round(sd(someinput, na.rm = TRUE), 2)
+  mystder <- round(mysd/sqrt(n.complete), 2)
+  Lower.CI <- round(mymean - 1.96*mystder, 2)
+  Upper.CI <- round(mymean + 1.96*mystder, 2)
+  
+  c(Complete.obs = n.complete, Missing.obs = n.missing,
+  Mean = mymean, Std.Error = mystder,
+  Lower.CI = Lower.CI, Upper.CI = Upper.CI)
+}
+`````
+
+
+It depends on the `na.check()` function, defined earlier, to calculate the number of missing values, i.e., `mytab()` depends on the availability of `na.check()` in order for it to work. Modify `mytab()` so it no longer depends on `na.check()` to calculate the number of missing values. Let's call the modified function `mytab1()`.
+
+
+```{r}
+mytab1 <- function(someinput){
+  n <- length(someinput)
+  n.missing <- length(which(is.na(someinput)))
+  n.complete <- n - n.missing
+  mymean <- round(mean(someinput, na.rm = TRUE), 2)
+  mysd <- round(sd(someinput, na.rm = TRUE), 2)
+  mystder <- round(mysd/sqrt(n.complete), 2)
+  Lower.CI <- round(mymean - 1.96*mystder, 2)
+  Upper.CI <- round(mymean + 1.96*mystder, 2)
+  c(Complete.obs = n.complete, Missing.obs = n.missing,
+  Mean = mymean, Std.Error = mystder,
+  Lower.CI = Lower.CI, Upper.CI = Upper.CI)
+}
+
+
+```
+
+6. Use `mytab1()` to produce a summary table for all continuous variables in `joined.df`.
+
+```{r}
+apply(joined.df[, c("pH", "Chlorophyll", "Day1", "Day2", "Day3")], 2, mytab1)
+
+```
+
+
+7. Use `mytab1()` to produce a summary table of `pH` for all `Calcium` levels in `joined.df`.
+
+```{r}
+with(joined.df, tapply(pH, Calcium, mytab1))
+
+```
+
+
+# 3. `tidyr` **R** package
+
+Create a new data set `joined.long.df` using `gather()` function in `tidyr` **R** package to combine the measurements at Day 1, 2, and 3 for the `Mercury` variable.  
+
+
+```{r} 
+library(tidyr)
+joined.long.df <- gather(joined.df, "Day1", "Day2", "Day3", key = Time, value= Mercury)
+
+```
+
+
+
+# 4. Challenge 
+
+1. Use `%>%` piping operator with functions in `dplyr` and `tidyr` **R** packages to recreate `joined.df` and then `joined.long.df`.
+
+
+```{r, eval = FALSE, tidy = FALSE}
+lake.df <- read.csv("location of your folder/Lake.csv", 
+                      stringsAsFactors = FALSE)
+
+mercury.df <- read.csv("location of your folder/Mercury.csv", 
+                      stringsAsFactors = FALSE)
+
+joined.df <- lake.df %>% 
+  mutate(pHtype = factor(ifelse(pH > 7, "alkalinity", 
+                                ifelse(pH < 7, "acidity", "natural")), 
+                         levels = c( "acidity", "natural", "alkalinity")), 
+         Calcium = factor(lake.df$Calcium, 
+                          levels = c("Low", "Medium", "High"))) %>% 
+  left_join(mercury.df, by = "ID")
+
+
+joined.long.df <- joined.df %>% gather("Day1", "Day2", "Day3", 
+                                       key = Time, value= Mercury)
+
+```
+
+
+```{r, echo = FALSE}
+
+lake.df <- read.csv("..\\..\\data\\Lake.csv", 
+                      stringsAsFactors = FALSE)
+mercury.df <- read.csv("..\\..\\data\\Mercury.csv", 
+                      stringsAsFactors = FALSE)
+
+joined.df <- lake.df %>% 
+  mutate(pHtype = factor(ifelse(pH > 7, "alkalinity", ifelse(pH < 7, "acidity", "natural")), 
+                                levels = c( "acidity", "natural", "alkalinity")), 
+         Calcium = factor(lake.df$Calcium, levels = c("Low", "Medium", "High"))) %>% 
+  left_join(mercury.df, by = "ID")
+
+
+joined.long.df <- joined.df %>% gather("Day1", "Day2", "Day3", key = Time, value= Mercury)
+
+```
+
+2. Use `group_by()` and `summarise()` functions to calculate the mean of mercury to only 2 decimal places for all six combinations of `pHtype`, `Calcium` and `Time`.
+
+```{r}
+
+joined.long.df %>% group_by(pHtype, Calcium, Time) %>% 
+  summarise(Mean = round(mean(Mercury, na.rm = TRUE), 2))
+
+```

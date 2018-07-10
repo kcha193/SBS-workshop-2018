@@ -1,0 +1,117 @@
+---
+title: "Introduction to **R**"
+subtitle: "Session 2"
+author: "Statistical Consulting Centre"
+date:  |
+  | `r readLines('../../metadata.txt')[2]`
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = FALSE, eval = FALSE)
+
+lake.df <- read.csv("..\\..\\data\\Lake.csv", 
+                      stringsAsFactors = FALSE)
+
+```
+
+# 1. Descriptive statistics
+
+1. Calculate the mean and standard deviation of both `pH` and `Chlorophyll`.
+
+```{r}
+mean(lake.df$pH, na.rm = TRUE)
+mean(lake.df$Chlorophyll, na.rm = TRUE)
+
+sd(lake.df$pH, na.rm = TRUE)
+sd(lake.df$Chlorophyll, na.rm = TRUE)
+
+```
+
+2. Check out what `summary()` does by running `summary(lake.df$pH)`.
+
+```{r}
+summary(lake.df$pH)
+
+```
+
+3. Check the frequency of `Calcium` concentration.
+
+```{r}
+table(lake.df$Calcium)
+
+```
+
+4. Turn the frequency table from above into a table of proportions, keep only 2 decimal places.
+
+```{r}
+round(prop.table(table(lake.df$Calcium)) * 100, 2)
+
+```
+
+
+# 2. Subsetting
+
+1. Print the following to the console:
+    
+    - The `pH` of the first lake.
+    
+```{r}
+lake.df$pH[1]
+```
+
+    - The `pH` of the last lake.
+    
+```{r}
+lake.df$pH[53]
+#or:
+lake.df$pH[nrow(lake.df)]
+```
+
+    - The `pH` values of the first and last lakes.
+    
+```{r}
+lake.df$pH[c(1, 53)]
+```
+
+    - All measurements made on the third lake.
+    
+```{r}
+lake.df[3, ]
+```
+
+    - All `pH` values.
+    
+```{r}
+lake.df[, "pH"]
+```
+
+2. Calculate:
+
+    - The average `pH` of lakes with low `Calcium` concentrations.
+    
+```{r}
+with(lake.df, mean(pH[Calcium == "Low"], na.rm = TRUE))
+```
+
+    - The average `pH` of lakes with low `Calcium` concentrations and `Chlorophyll` concentrations lower than 10.
+    
+```{r}
+with(lake.df, mean(pH[Calcium == "Low" & Chlorophyll < 10], na.rm = TRUE))
+```
+
+# 3. `ifelse()` function
+
+1. Create a new variable called `pHtype` which has the value `acidic` if `pH` $< 7$, the value `basic` if `pH` $> 7$ and the value `natural` if `pH` $== 7$.
+
+```{r}
+lake.df$pHtype <- with(lake.df, ifelse(pH > 7, "basic", ifelse(pH < 7, "acidic", "natural")))
+
+```
+
+2. Produce a two-way frequency table of `Calcium` versus `pHtype`.
+
+```{r}
+with(lake.df, table(Calcium, pHtype))
+
+```

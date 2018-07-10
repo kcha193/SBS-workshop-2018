@@ -1,0 +1,487 @@
+\documentclass{beamer}\usepackage{graphicx, color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.2, 0.2, 0.2}
+\newcommand{\hlnumber}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlfunctioncall}[1]{\textcolor[rgb]{0.501960784313725,0,0.329411764705882}{\textbf{#1}}}%
+\newcommand{\hlstring}[1]{\textcolor[rgb]{0.6,0.6,1}{#1}}%
+\newcommand{\hlkeyword}[1]{\textcolor[rgb]{0,0,0}{\textbf{#1}}}%
+\newcommand{\hlargument}[1]{\textcolor[rgb]{0.690196078431373,0.250980392156863,0.0196078431372549}{#1}}%
+\newcommand{\hlcomment}[1]{\textcolor[rgb]{0.180392156862745,0.6,0.341176470588235}{#1}}%
+\newcommand{\hlroxygencomment}[1]{\textcolor[rgb]{0.43921568627451,0.47843137254902,0.701960784313725}{#1}}%
+\newcommand{\hlformalargs}[1]{\textcolor[rgb]{0.690196078431373,0.250980392156863,0.0196078431372549}{#1}}%
+\newcommand{\hleqformalargs}[1]{\textcolor[rgb]{0.690196078431373,0.250980392156863,0.0196078431372549}{#1}}%
+\newcommand{\hlassignement}[1]{\textcolor[rgb]{0,0,0}{\textbf{#1}}}%
+\newcommand{\hlpackage}[1]{\textcolor[rgb]{0.588235294117647,0.709803921568627,0.145098039215686}{#1}}%
+\newcommand{\hlslot}[1]{\textit{#1}}%
+\newcommand{\hlsymbol}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlprompt}[1]{\textcolor[rgb]{0.2,0.2,0.2}{#1}}%
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\newenvironment{changemargin}[2]{%
+\begin{list}{}{%
+\setlength{\topsep}{0pt}%
+\setlength{\leftmargin}{#1}%
+\setlength{\rightmargin}{#2}%
+\setlength{\listparindent}{\parindent}%
+\setlength{\itemindent}{\parindent}%
+\setlength{\parsep}{\parskip}%
+}%
+\item[]}{\end{list}}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{url}
+\usetheme{Warsaw}
+\setbeamertemplate{navigation symbols}{}
+\logo{\includegraphics[width=0.1\textwidth,keepaspectratio]{..//..//UOACrest.png}}
+\author[SCC]{Statistical Consulting Center}%\\
+\institute{\href{mailto:consulting@stat.auckland.ac.nz}
+  {consulting@stat.auckland.ac.nz}\\
+%Statistical Consulting Centre\\
+The Department of Statistics\\
+The University of Auckland}
+\title[\hspace{2em}\insertframenumber/\inserttotalframenumber]{NZSSN Courses: Introduction
+to \texttt{R}}
+\subtitle{Simple analysis}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+%\SweaveOpts{concordance=TRUE}
+\maketitle
+ 
+\begin{frame}[fragile]
+  \frametitle{Regression commands}
+
+
+Two of the most commonly used \texttt{R} commands for modeling:
+  \begin{itemize}
+  \item \texttt{lm()}: fits \textbf{L}inear \textbf{M}odels
+  \item \texttt{glm()}: fits \textbf{G}eneralised \textbf{L}inear
+    \textbf{M}odels.\\\vspace{0.5cm}
+
+  Note: If you have used SAS, its \texttt{PROC GLM} is \textbf{not} the same
+  as \texttt{R}'s \texttt{glm()}
+  \end{itemize}
+There's a lot to learn from these two commands: entire stage 3 statistical course.
+\end{frame} 
+
+\begin{frame}[fragile]
+  \frametitle{Student's t test}
+  \begin{verbatim}
+  t.test(y~x)
+  \end{verbatim}
+  \begin{itemize}
+  \item \texttt{y}: values, e.g. \texttt{total.sca, Q1.sca, Age}, etc.
+  \item \texttt{x}: group, e.g., \texttt{Gender, Q5}(obedient or think themselves).
+  \end{itemize}
+Suppose we want to test whether males and females have different feminist score, i.e., \texttt{y = total.sca, x = Gender}.\\\vspace{0.5cm}
+
+Just like graphics, all categorical variables should be converted into factor for analysis.
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Student's t test}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlfunctioncall{with}(issp.df, \hlfunctioncall{t.test}(total.sca ~ Gender))
+\end{alltt}
+\begin{verbatim}
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  total.sca by Gender 
+## t = 4.342, df = 874.7, p-value = 1.579e-05
+## alternative hypothesis: true difference in means is not equal to 0 
+## 95 percent confidence interval:
+##  0.3541 0.9385 
+## sample estimates:
+## mean in group Female   mean in group Male 
+##                12.71                12.06
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Student's t test}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  total.sca by Gender 
+## t = 4.342, df = 874.7, p-value = 1.579e-05
+## alternative hypothesis: true difference in means is not equal to 0 
+## 95 percent confidence interval:
+##  0.3541 0.9385 
+## sample estimates:
+## mean in group Female   mean in group Male 
+##                12.71                12.06
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{itemize}
+\item \texttt{p}-value = \ensuremath{1.5791\times 10^{-5}}.
+\item We have extremely strong evidence that the mean feminist scores are different.
+\item Of course we have very large samples.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Student's t test}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  total.sca by Gender 
+## t = 4.342, df = 874.7, p-value = 1.579e-05
+## alternative hypothesis: true difference in means is not equal to 0 
+## 95 percent confidence interval:
+##  0.3541 0.9385 
+## sample estimates:
+## mean in group Female   mean in group Male 
+##                12.71                12.06
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{itemize}
+\item The estimated difference between female and male is 12.71 $-$ 12.06 = 0.65.
+\item We have a statistical significance.
+\item Is the difference significant in a social scientist point of view?
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Multiple comparisons}
+Now we want to compare the feminist scores between three age groups.
+\begin{enumerate}
+\item Do a t-test between "Under 35" and "36 to 60".
+\item Do a t-test between "Under 35" and "Over 61".
+\item Do a t-test between "36 to 60" and "Over 61".
+\end{enumerate}
+\begin{center}
+\huge{Really?}
+\end{center}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Error rate}
+When we do a t-test of feminist score between female and male, the
+null hypothesis is the feminist score for female is the same as
+male. The t-test is performed to reject this null hypothesis.\\
+
+In order to come up with a p-value, we \emph{assume} that $\alpha$
+(typically 5\%) of the time, we will reject the null hypothesis when
+it's actually true, i.e., we assume 5\% of the time we will make a mistake.
+
+\begin{itemize}
+\item When we do two simultaneous t-tests, about 10\% of the time we will make a mistake.
+\item When we do three simultaneoust-tests,about 15\% of the time we will make a mistake.
+\item The chance of being shot in Russian Roulette is 16.67\%, would
+  you risk it then?
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Error rate}
+\begin{itemize}
+\item If you don't thinks 15\% is bad enough, think about \texttt{Income} (9 levels).
+\item There are 36 pair-wise comparisons.
+\item Chance of making a mistake? 36 $\times$ $\alpha$ = 180 \%!
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{\textit{\textbf{An}}alysis \textit{\textbf{o}}f \textit{\textbf{Va}}riance (ANOVA)}
+Generalises t test to more than two groups.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+tryaov <- \hlfunctioncall{with}(issp.df, \hlfunctioncall{aov}(total.sca ~ age.group))
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\begin{itemize}
+\item \texttt{aov()}: \textbf{A}nalysis \textbf{o}f \textbf{V}ariance.
+\item Response variable (i.e. \texttt{total.sca}) is separated by
+  \texttt{\~} from explanatory variable(s) (i.e. \texttt{age.group}).
+\item All explanatory variables should be categorical (otherwise it's
+  not ANOVA).
+\end{itemize} 
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{\texttt{aov()}}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlfunctioncall{summary}(tryaov)
+\end{alltt}
+\begin{verbatim}
+##              Df Sum Sq Mean Sq F value Pr(>F)    
+## age.group     2    803     401    89.8 <2e-16 ***
+## Residuals   951   4250       4                   
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+## 93 observations deleted due to missingness
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+We have extremly strong evidence that at least one age group has different mean feminist score from the other age groups.\\\vspace{0.3cm}
+\textbf{At least one group different from the others.}\\\vspace{0.3cm}
+Do \textbf{NOT} over-interpret it!!!
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Which one?}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlfunctioncall{model.tables}(tryaov, \hlstring{"means"})
+\end{alltt}
+\begin{verbatim}
+## Tables of means
+## Grand mean
+##       
+## 12.44 
+## 
+##  age.group 
+##     Under 35 36 to 60 Over 61
+##        13.39    12.46   10.79
+## rep   319.00   446.00  189.00
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+
+\begin{itemize}
+\item The mean feminist score for all participants is 12.4.
+\item The mean feminist score for "Under 35" is higher than "36 to 60" and "Over 61".
+\item The mean feminist score for "36 to 60" is higher than "Over 61".
+\item Are they significant?
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Post-hoc multiple comparisons}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlfunctioncall{TukeyHSD}(tryaov)
+\end{alltt}
+\begin{verbatim}
+##   Tukey multiple comparisons of means
+##     95% family-wise confidence level
+## 
+## Fit: aov(formula = total.sca ~ age.group)
+## 
+## $age.group
+##                      diff    lwr     upr p adj
+## 36 to 60-Under 35 -0.9336 -1.297 -0.5697     0
+## Over 61-Under 35  -2.6004 -3.056 -2.1449     0
+## Over 61-36 to 60  -1.6668 -2.097 -1.2361     0
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{itemize}
+\item \texttt{diff}, estimated difference between two groups.
+\item \texttt{lwr, upr}, lower and upper limit of the 95\% confidence interval of the estimated difference.
+\item \texttt{p adj} , \texttt{p}-values adjusted for multiple comparisons.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Post-hoc multiple comparisons}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+##                      diff    lwr     upr     p adj
+## 36 to 60-Under 35 -0.9336 -1.297 -0.5697 7.353e-09
+## Over 61-Under 35  -2.6004 -3.056 -2.1449 1.400e-13
+## Over 61-36 to 60  -1.6668 -2.097 -1.2361 1.691e-13
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{itemize}
+\item Mean feminist score for "36 to 60" is 0.9 scales \emph{lower} than "Under 35" (\texttt{p adj} $<$ 0.0001).
+\item Mean feminist score for "Over 61" is 2.6 scales \emph{lower} than "Under 35" (\texttt{p adj} $<$ 0.0001).
+\item Mean feminist score for "Over 61" is 1.7 scales \emph{lower} than "36 to 60" (\texttt{p adj} $<$ 0.0001).
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Recall}
+\begin{figure}[h]
+  \vspace{-20pt}
+  \centering
+  \includegraphics[height = 0.8\textwidth, keepaspectratio]{m5.pdf}
+  %\vspace{-20pt}
+  %\caption{Boxplots of PM10 in 2006--2012}
+  \label{fig:m5}
+\end{figure}
+\end{frame} 
+
+\begin{frame}
+  \frametitle{Recall}
+\begin{figure}[h]
+  \vspace{-20pt}
+  \centering
+  \includegraphics[height = 0.8\textwidth, keepaspectratio]{../../Session 6/Slides/figure/m5.pdf}
+  %\vspace{-20pt}
+  %\caption{Boxplots of PM10 in 2006--2012}
+%  \label{fig:m5}
+\end{figure}
+\end{frame} 
+
+
+\begin{frame}[fragile]
+  \frametitle{Two way ANOVA}
+\begin{itemize} 
+\item \texttt{tryaov} was fitted using one categorical explanatory variable (\texttt{age.group}), we call it \emph{one-way} anova.
+\item Consequently, if we fit a model using two categorical explanatory variables, we have a \emph{two-way} anova.
+\item Recall: All categorical variables should be converted into factors.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+issp.df$Gender = \hlfunctioncall{factor}(issp.df$Gender)
+try2way <- \hlfunctioncall{with}(issp.df, 
+                \hlfunctioncall{aov}(total.sca~Gender*age.group))
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\item \verb|Gender*age.group| is equivalent to \verb|Gender + age.group + Gender:age.group|.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Two way ANOVA}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlfunctioncall{summary}(try2way)
+\end{alltt}
+\begin{verbatim}
+##                   Df Sum Sq Mean Sq F value  Pr(>F)    
+## Gender             1     98      98   22.20 2.8e-06 ***
+## age.group          2    774     387   87.90 < 2e-16 ***
+## Gender:age.group   2     15       7    1.65    0.19    
+## Residuals        947   4167       4                    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+## 94 observations deleted due to missingness
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+There is no two-way interaction between \texttt{Gender} and \texttt{age.group} (\texttt{p}-value = 0.19), i.e., the effect of \texttt{age.group} on feminist score does not depend on \texttt{Gender}, or vice versal.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+try2way.2nd <- \hlfunctioncall{with}(issp.df, 
+                    \hlfunctioncall{aov}(total.sca~Gender+age.group))
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\end{frame} 
+
+
+\begin{frame}[fragile]
+  \frametitle{Two way ANOVA}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlfunctioncall{summary}(try2way.2nd)
+\end{alltt}
+\begin{verbatim}
+##              Df Sum Sq Mean Sq F value  Pr(>F)    
+## Gender        1     98      98    22.2 2.9e-06 ***
+## age.group     2    774     387    87.8 < 2e-16 ***
+## Residuals   949   4181       4                    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+## 94 observations deleted due to missingness
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{itemize}
+\item We have extremly strong evidence that at least one age group has different mean feminist score from the other age groups.
+\item We have extremly strong evidence that at least one gender group has different mean feminist score from the other gender groups, i.e., males have different mean feminist score from females. This is only true if the categorical variable has only two levels.
+\end{itemize}
+\end{frame} 
+
+\begin{frame}[fragile]
+  \frametitle{Recall}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+##   age.group               Q5 freq
+## 1  Under 35      be obedient   38
+## 2  36 to 60      be obedient   74
+## 3   Over 61      be obedient   75
+## 4  Under 35 think themselves  259
+## 5  36 to 60 think themselves  353
+## 6   Over 61 think themselves  122
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\end{frame} 
+
+\end{document}     

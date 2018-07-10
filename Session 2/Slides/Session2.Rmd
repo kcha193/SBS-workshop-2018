@@ -1,0 +1,450 @@
+---
+title: "Introduction to **R**"
+subtitle: "Session 2 -- Descriptive statistics and Data subsetting"
+date:  |
+  | `r readLines('../../metadata.txt')[2]`
+output:
+  beamer_presentation:
+    theme: "Madrid"
+    colortheme: "crane"
+    fonttheme: "professionalfonts"
+    fig_caption: true
+    includes:
+      in_header: ../../header.tex
+---
+
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(tidy = TRUE)
+options(width = 50)
+patient.df <- read.csv("..\\..\\data\\Patient.csv", stringsAsFactors = FALSE)
+```
+
+# Reading data into **R** (Session 1)
+```{r, eval=FALSE, echo = TRUE, tidy = FALSE}
+patient.df <- read.csv("Data/Patient.csv", 
+                       stringsAsFactors = FALSE)
+str(patient.df)
+```
+
+```{r, eval=TRUE, echo = FALSE}
+patient.df <- read.csv("..\\..\\Data\\Patient.csv", stringsAsFactors = FALSE)
+str(patient.df)
+```
+
+
+# Descriptive statistics
+Calculate the average of `Height`:
+
+```{r, error=TRUE, echo = TRUE}
+mean(Height)
+```
+
+You must tell **R** that `Height` is a variable (column) *within* `patient.df` data frame using `$` symbol, i.e.
+```{r, error=TRUE, echo = TRUE}
+mean(patient.df$Height)
+```
+
+There are missing values is the `Height` variable that **R** does not know what to do with. 
+
+# Calculating averages with missing values
+
+We can tell **R** to remove the missing values before calculating the average height:
+
+```{r}
+mean(patient.df$Height, na.rm = TRUE)
+```
+
+
+# Table of counts
+```{r}
+# One-way frequency table
+
+table(patient.df$Sex)
+```
+
+# Table of proportions
+
+```{r}
+# Total count
+total <- sum(table(patient.df$Sex))
+total
+
+# Proportions of total
+table(patient.df$Sex)/total
+```
+
+# One-way frequency tables and `with()` 
+Tired of typing `patient.df$` over and over again? Use the `with()` function.
+```{r}
+Sex.table <- with(patient.df, table(Sex))
+Sex.table
+total <- sum(Sex.table)
+Sex.table/total
+```
+
+
+# One-way frequency tables and `with()` 
+
+```{r}
+#Convert to percentages
+Sex.pct <- 100*Sex.table/total
+Sex.pct
+# Round to 1 decimal place
+round(Sex.pct, 1)
+```
+
+#  Two-way frequency tables
+```{r}
+Sex.Race.tab <- with(patient.df, table(Sex, Race))
+Sex.Race.tab
+```
+
+#  Two-way proportion tables
+```{r}
+# Calculate proportion with respect to 'margin' total
+# margin = 1 (row total) or 2 (column total) 
+perc.Sex.Race <- prop.table(Sex.Race.tab, margin = 2)
+perc.Sex.Race
+```
+
+# Two-way proportion tables
+```{r}
+# Tabulate as percentages
+round(100*perc.Sex.Race, 1)
+```
+
+
+# `which` individual does Smoke?
+Let's use **R**'s powerful subsetting capabilities to select those cases for which the value of Smoke is 1 (i.e. Yes).
+```{r}
+index <- which(patient.df$Smoke == 1)
+index
+```
+
+# How many are there?
+```{r}
+# Use length() to count the number of elements in "index".
+length(index)
+```
+
+- `patient.df$Smoke == 1` gives a logical vector of `TRUE`/`FALSE` for every observation.
+- `which()` gives an integer vector on the position of `TRUE`. 
+- `length()` tells us how many elements there are in the vector.
+
+#How many are there?
+Another way is to sum up how many `TRUE`s in the logical vector `patient.df$Smoke == 1`,
+```{r}
+sum(patient.df$Smoke == 1)
+```
+
+#How many are there?
+Another way is to sum up how many `TRUE`s in the logical vector `patient.df$Smoke == 1`
+```{r}
+sum(patient.df$Smoke == 1, na.rm = TRUE)
+```
+
+# Who are they?
+```{r}
+# Use square brackets to extract IDs corresponding  
+# to the cases numbers contained in "index"
+index <- which(patient.df$Smoke == 1)
+patient.df$Patient.ID[index]
+```
+
+# Subsetting
+Square brackets `[]` are used to extract subsets of data.
+```{r}
+# First element only
+patient.df$Height[1]
+# All but the first element
+patient.df$Height[-1]
+```
+
+# Subsetting
+Square brackets `[]` are used to extract subsets of data.
+```{r}
+# Elements 3 through 8
+patient.df$Height[3:8]
+# Elements 3 and 8
+patient.df$Height[c(3,8)]
+```
+
+# Subsetting
+Subsetting two-dimensional arrays, such as data frames, requires the use of **two** indices.
+```{r}
+#First row or record
+patient.df[1, ] 
+```
+
+# Subsetting
+For data frames, you need to use two indices.
+```{r}
+#Second column or variable
+patient.df[, 2] 
+```
+
+# Subsetting
+For data frames, you need to use two indices.
+```{r}
+#Some rows and columns
+patient.df[2:5, 4:7] 
+```
+
+# Subsetting
+For data frames, you need to use two indices.
+```{r}
+#Rows by number, columns by name
+patient.df[1:10, c("Race", "Smoke")] 
+```
+
+
+# Missing values
+
+- **R** reserves the object `NA` (`N`ot `A`vailable) for elements of a vector that are missing or unavailable.   
+- Use of `is.na()` to search for missing values requires that they are recorded as `NA`.  
+- `na` will not do because **R** is *case sensitive*! 
+
+```{r} 
+sum(is.na(patient.df$Smoke))
+```
+
+# Missing values
+The default option of `table()` ignores `NA`s when constructing frequency tables. 
+
+```{r}
+table(patient.df$Smoke)
+```
+
+# Missing values
+If you still want to see how many `NA`s in the frequency tables, you can change the `useNA` argument to `"always"` in `table()`.
+```{r}
+table(patient.df$Smoke, useNA = "always")
+```
+
+# Data Cleaning
+The `ifelse()` function provides a quick way to convert the `Smoke` variable in `patient.df` from numbers to words, 
+```{r, eval = FALSE}
+  ifelse(test, yes, no)
+```
+
+- `test`: a logical test.
+- `yes`, what happens if the test is True.
+- `no`, what happens if the test is False.
+
+Note, the `ifelse()` in **R** has the same functionality as `IF()` in Excel.
+
+# Cleaning up the `Smoke` variable
+
+Notice how we still need to remember if 1 or 2 denotes a smoker or non-smoker. 
+
+```{r, tidy = FALSE}
+patient.df$Smoke.group <- 
+  with(patient.df, ifelse(Smoke == 1, "Yes", "No"))
+
+table(patient.df$Smoke.group)
+```
+
+Notice now we have created a new variable `Smoke.group` in `patient.df` data frame.
+
+# Cleaning up the `Race` variable
+
+Remember that the `Race` variable has 3 levels (Caucasian, African, Other). We can nest an `ifelse()` statement inside another `ifelse()` statement.
+
+```{r, tidy = FALSE}
+patient.df$Race.group <- 
+  with(patient.df,
+       ifelse(Race == 1, "Caucasian",
+              ifelse(Race == 2, "African", "Other")))
+table(patient.df$Race.group)
+```
+
+# Our clean data set
+```{r}
+head(patient.df)
+```
+
+# Our clean data set
+```{r}
+str(patient.df)
+```
+
+# Our clean data set
+Now we have created new variables, `Smoke.group` and `Race.group`, the next step is to remove the `Smoke` and `Race` variables in the `patient.df`.
+
+```{r} 
+names(patient.df)
+```
+
+# Removing the `Smoke` and `Race` variables
+Now we have created new variables, `Smoke.group` and `Race.group`, the next step is to remove the `Smoke` and `Race` variables in the `patient.df`.
+
+```{r} 
+Smoke.index <- which(names(patient.df) == "Smoke")
+Smoke.index
+
+Race.index <- which(names(patient.df) == "Race")
+Race.index
+
+names(patient.df[,-c(Smoke.index, Race.index)])
+```
+
+# Removing the `Smoke` and `Race` variables with `%in%`
+
+- `x %in% table` operator allows value matching, return a logical vector, indicating if a match was located for each element of `x`. 
+
+- `!` reverse the logical vector, i.e. `TRUE` $\rightarrow$ `FALSE`.
+
+```{r} 
+names(patient.df)
+
+names(patient.df) %in% c("Smoke", "Race")
+
+!names(patient.df) %in% c("Smoke", "Race")
+```
+
+# Removing the `Smoke` and `Race` variables with `%in%`
+```{r} 
+names(patient.df[, !names(patient.df) %in% c("Smoke", "Race")])
+
+patient.df <- 
+  patient.df[, !names(patient.df) %in% c("Smoke", "Race")]
+
+```
+
+
+# Your turn
+
+First to calculate `BMI`:
+\[
+\mathtt{BMI} = \frac{\mathtt{Weight(kg)}}{\mathtt{Height(m)}^2}
+= \frac{\mathtt{Weight(pounds)}}{\mathtt{Height(inches)}^2} \times 703
+\]
+
+Then, create a `BMI.group` for `normal`, `overweight` and `obese`, where, 
+
+- overweight is a BMI greater than or equal to 25; and
+- obesity is a BMI greater than or equal to 30.
+
+
+# Your turn
+To calculate `BMI`:
+\[
+\mathtt{BMI} = \frac{\mathtt{Weight(kg)}}{\mathtt{Height(m)}^2}
+= \frac{\mathtt{Weight(pounds)}}{\mathtt{Height(inches)}^2} \times 703
+\]
+
+```{r, tidy=FALSE}
+patient.df$BMI <- (patient.df$Weight/patient.df$Height^2)*703
+mean(patient.df$BMI, na.rm = TRUE)
+```
+
+Or, 
+```{r, tidy=FALSE}
+patient.df$BMI <- with(patient.df, (Weight/Height^2)*703)
+mean(patient.df$BMI, na.rm = TRUE)
+```
+
+# Your turn
+
+```{r, tidy=FALSE}
+patient.df$BMI.group <- 
+  ifelse(patient.df$BMI >= 30, "obese", 
+         ifelse(patient.df$BMI >= 25, "overweight",
+          "normal"))
+table(patient.df$BMI.group)
+table(patient.df$BMI.group, useNA = "always")
+
+```
+
+# Subsetting in calculations
+```{r}
+with(patient.df, table(Race.group, BMI.group))
+```
+
+# Subsetting in calculations
+Produce the last table with Race groups of `African` and `Caucasian`, and BMI groups of `obese` and `overweight` 
+```{r, tidy = FALSE}
+exclude.rows <-
+  with(patient.df,
+     which(Race.group == "Other" | BMI.group == "normal"))
+```
+These are rows of Race group is `other` **or** BMI.group is `normal`
+
+# Subsetting in calculations
+Produce the last table with Race groups of `African` and `Caucasian`, and BMI groups of `obese` and `overweight` 
+```{r, tidy = FALSE}
+head(patient.df[-exclude.rows, c("Race.group", "BMI.group")])
+```
+
+# Subsetting in calculations
+```{r, tidy=FALSE}
+r.b.tab <- with(patient.df[-exclude.rows,], 
+                table(Race.group, BMI.group))
+r.b.tab
+```
+
+# Subsetting in calculations
+Convert counts to percentages rounded to 1 decimal place.
+```{r}
+round(prop.table(r.b.tab)*100, 1)
+```
+
+# Different way
+```{r}
+r.b.tab1 <- with(patient.df, 
+                 table(Race.group, BMI.group))
+dim(r.b.tab1)
+row.names(r.b.tab1)
+colnames(r.b.tab1)
+```
+
+# Different way
+```{r}
+colnames(r.b.tab1)
+which(row.names(r.b.tab1) == "Other")
+which(colnames(r.b.tab1) == "normal")
+```
+
+# Different way
+```{r}
+r.b.tab1[-3, -1]
+
+round(prop.table(r.b.tab1[-3, -1])*100, 1)
+```
+
+# Your turn 
+
+- Average BMI of females   
+- Average BMI level of males **and** Caucasian. 
+      
+      + Hint: *And* operator is `&`. 
+
+
+# Subsetting in calculations
+```{r, tidy = FALSE}
+# Average BMI level of females
+with(patient.df, mean(BMI[Sex == "Female"], na.rm = TRUE))
+
+# Average BMI level of females and Caucasian
+with(patient.df,
+     mean(BMI[Sex == "Male" & 
+              Race.group == "Caucasian"],
+          na.rm = TRUE))
+```
+
+# Summary
+
+- Making R functions
+- Subsetting vectors and datasets
+- `ifelse()` function
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,197 @@
+---
+title: "Introduction to $\\mathtt{R}$"
+subtitle: "Session 7 -- Simple Analysis"
+author: "Statistical Consulting Centre"
+date:  |
+  | `r readLines('../../metadata.txt')[2]`
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = FALSE, eval = FALSE)
+
+load("../../RData/Ex5.RData")
+
+```
+
+
+# 1. T-test
+
+1. Do a two-sample $t$-test (two-sided) to see whether `Mercury` for acidic lakes is different from other `pHtype` levels, assuming 
+
+    (a) population variances are equal, and
+
+```{r}
+joined.long.df$pHtypeAcidic <- with(joined.long.df, ifelse(pH < 7, "acidity", "Others"))
+
+with(joined.long.df, t.test(Mercury~pHtypeAcidic, var.equal = TRUE))
+```
+
+    (b) population variances are not equal
+
+```{r}
+
+with(joined.long.df, t.test(Mercury~pHtypeAcidic, var.equal = FALSE))
+```
+
+Hint: Create a new variable `pHtypeAcidic` for just acidic group.
+
+2. How do the results from using the following code compare with the results you got in question 1?
+
+````
+acid.mer <- with(joined.long.df, mercury[pHtype == "acidic"])
+not.acid.mer <- with(joined.long.df, mercury[pHtype != "acidic"])
+
+t.test(acid.mer, not.acid.mer)
+
+````
+
+```{r}
+
+acid.mer <- with(joined.long.df, Mercury[pHtype == "acidic"])
+not.acid.mer <- with(joined.long.df, Mercury[pHtype != "acidic"])
+
+t.test(acid.mer, not.acid.mer)
+
+```
+
+
+# 2. One-way ANOVA
+
+1. Perform an ANOVA to test the null hypothesis that the mean `Mercury` concentrations are all equal for all three `Calcium` levels.
+
+```{r}
+
+myaov <- with(joined.long.df, aov(Mercury ~ Calcium))
+
+```
+
+2. Use `summary()` to check the overall signifcance of `Calcium`.
+
+```{r}
+
+summary(myaov)
+
+```
+
+
+3. Use `model.tables()` to calculate the mean `Mercury` concentrations for each `Calcium` level.
+
+
+```{r}
+model.tables(myaov, type = "means")
+```
+
+
+4. Carry out pairwise comparisons of mean `Mercury` concentrations between pairs of `Calcium` levels, adjusting the $p$-values using Tukey's Honestly Signifcant Difference test.
+
+```{r}
+TukeyHSD(myaov)
+
+```
+
+
+# 3. Two-way ANOVA
+
+1. Perform a Two-way ANOVA to test the null hypothesis that the mean `Mercury` concentrations are all equal for all three `Calcium` levels across all three days.
+
+```{r}
+
+myaov <- with(joined.long.df, aov(Mercury ~ Calcium*Time))
+
+```
+
+2. Use `summary()` to check the overall signifcance.
+
+```{r}
+
+summary(myaov)
+
+```
+
+
+3. Use `model.tables()` to calculate the mean `Mercury` concentrations for each `Calcium` level.
+
+
+```{r}
+model.tables(myaov, type = "means")
+```
+
+
+4. Carry out pairwise comparisons of mean `Mercury` concentrations, adjusting the $p$-values using Tukey's Honestly Signifcant Difference test.
+
+```{r}
+TukeyHSD(myaov)
+
+```
+
+
+# 4. Test of independence
+
+1. Perform a Pearson's Chi-squared test to check if `Calcium` depend on `pHtype` level? 
+
+```{r}
+ca.ph.tab <- with(joined.df, table(Calcium, pHtype))
+ca.ph.tab
+
+chisq.test(ca.ph.tab)
+
+```
+
+2. Why is there a warning from 4.1? What is an altertive test which we can perform?
+
+
+```{r} 
+fisher.test(ca.ph.tab)
+
+```
+
+
+# 5. Linear regression
+
+1. Produce a scatter plot between `pH` (x-axis) and `Mercury` (y-axis).
+
+```{r}
+with(joined.long.df, plot(pH, Mercury))
+
+```
+
+
+2. Describe the relationship between `pH` and `Mercury` shown in the scatter plot.
+
+
+3. Fit a linear model between `pH` and `Mercury`, in which `Mercury` is the dependent (response) variable and `pH` is the independent (explanatory) variable. Name the linear model as `mylm`.
+
+
+```{r}
+mylm <- with(joined.long.df, lm(Mercury ~ pH))
+```
+
+4. Use `summary()` to obtain the estimates and test the statistical signifcance of the intercept and slope.
+
+```{r}
+summary(mylm)
+```
+
+5. Write down the equation of the fitted line.
+
+
+6. Use the following code to check the residuals, for homogeneity of variance.
+
+````
+plot(predict(mylm), residuals(mylm))
+abline(h = 0, lwd = 2, col = 2)
+````
+
+```{r}
+plot(predict(mylm), residuals(mylm))
+abline(h = 0, lwd = 2, col = 2)
+```
+
+
+
+
+
+
+
+

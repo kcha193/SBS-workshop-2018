@@ -1,0 +1,98 @@
+---
+title: "Introduction to **R**"
+subtitle: "Session 1"
+author: "Statistical Consulting Centre"
+date:  |
+  | `r readLines('../../metadata.txt')[2]`
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = FALSE, eval = FALSE)
+
+#knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+```
+
+# 1. Using **R** as a calculator
+
+1. Find the values of:
+
+    (a) $1+4$
+
+    ```{r}
+      1+4
+    ```
+    
+    (b) $2^3 + \frac{4}{\sqrt{34}}$
+    
+    ```{r}
+      2^3 + 4/sqrt(34)
+    ```
+    
+    (c) $\log{30}$
+    
+    ```{r}
+      log(30)
+    ```
+    
+    (d) $\log_{10}30$
+    
+    ```{r}
+      log(30)
+    ```
+    
+    (e) $|-2|$ \hspace{0.2cm}(Hint: $|x|$ denotes the \emph{absolute
+    value} of $x$. Search on Google if you're unsure.)
+    
+    ```{r}
+      abs(-2)
+    ```
+
+2. Now open Rstudio, open an **R** script by clicking `File` $\rightarrow$ `New` $\rightarrow$ `R script`.
+  
+3. Save this script by clicking `File` $\rightarrow$ `Save As...`.
+  
+4. Select a directory/location and save the script.
+  
+5. Copy and paste (or just write out again) the code you used for question 1a -- 1e into the script. 
+
+6. You can now submit your script line-by-line using Ctrl $+$ Enter. You can also highlight the code you want to evaluate and press Ctrl $+$ Enter. This will send the highlighted code in the script directly into the console.
+
+7. From now on, type all of your code in your **R** script and submit it to the **R** Console using Ctrl $+$ Enter.
+
+# 2. Reading data into **R**
+
+1. `Lake.csv` contains data on 53 different lakes in Florida. The variable names and what has been measured are presented below.
+
+    + `ID`: ID number of the lake
+    + `Lake`: Name of the lake
+    + `pH`: pH value
+    + `Calcium`: concentration of Calcium 
+    + `Chlorophyll`: concentration of Chlorophyll (mg/L)
+
+2. Read the data into **R**, saving it in object named \texttt{lake.df}.
+
+```{r, eval = FALSE}
+lake.df <- read.csv("Data/Lake.csv", 
+                      stringsAsFactors = FALSE)
+
+```
+
+```{r, echo = FALSE}
+lake.df <- read.csv("..\\..\\data\\Lake.csv", 
+                      stringsAsFactors = FALSE)
+```
+
+3. Use `dim()`, `head()` and `str()` to look at some of the properties of the dataset you have just read into **R**. **Always** perform this important step to check that your dataset is as it should be.
+
+```{r}
+dim(lake.df)
+head(lake.df)
+str(lake.df)
+```
+
+Note that RStudio makes this step really easy. Check out the Environment tab in RStudio (see Figure 1).
+
+![Environment tab in RStudio showing the properties for the `lake.df` data set](../Slides/Figure/dataframe_info.png)
+
+

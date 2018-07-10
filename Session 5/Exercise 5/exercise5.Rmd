@@ -1,0 +1,94 @@
+---
+title: "Introduction to **R**"
+subtitle: "Session 5"
+author: "Statistical Consulting Centre"
+date:  |
+  | `r readLines('../../metadata.txt')[2]`
+output: pdf_document
+---
+
+
+```{r setup, include=FALSE}
+# knitr::opts_chunk$set(echo = FALSE)
+# knitr::opts_chunk$set(eval = TRUE)
+
+library(dplyr)
+library(tidyr)
+
+load("../../RData/Ex5.RData")
+```
+
+
+# 1. Box plot
+
+Using `joined.long.df`, draw a box plot showing the distribution of `Mercury` for each of the levels of `Time`. The box plot should look exactly like 
+
+```{r, fig.align='center'}
+with(joined.long.df, plot(Calcium, Mercury,
+                      xlab = "Day", cex.lab = 1.5,
+                      ylab = "Mercury concentration",
+                      main = "Mercury contaminations in Florida lakes"))
+
+```
+
+The box plot should have:
+
+- labels on the x-axis,
+- an informative label on the y-axis (not `Mercury`),
+- a title, and
+- labels that are large enough to read.
+
+
+\newpage
+
+# 2. Scatter plot
+Using `joined.long.df`, draw a scatter plot which shows the relationship between `pH` and `Mercury` for each of the `Calcium` levels. The scatter plot should look the same as 
+
+```{r, fig.align='center'}
+with(joined.long.df, plot(pH, Mercury, 
+     col = c(1,2,4)[Calcium], 
+     pch = c(20, 22,3)[Calcium], 
+     xlab = "pH value", ylab = "Mercury concentration"))
+
+legend("topright", pch = c(20, 22, 3), 
+       col = c(1, 2, 4),
+       cex = 1,
+legend = c("Low", "Medium", "High"))
+```
+
+Hint: 
+
+- `Low Calcium` level: using `pch = 20` and `col = 1`.
+- `Medium Calcium` level: using `pch = 22` and `col = 2`.
+- `High Calcium` level: using `pch = 3` and `col = 4`.
+
+\newpage
+
+# 3. Bar plot
+
+Using `joined.long.df`, draw a bar plot that shows the average `Mercury` concentration for the six combinations of `Calcium` and `pHtype`. The graph should look exactly the same as
+
+```{r, fig.align='center'}
+trt.mean <- with(joined.long.df, tapply(Mercury,
+                            list(pHtype, Calcium), mean))
+
+barplot(trt.mean, beside = TRUE, space = c(0.1, 1),
+    legend.text= c("Acidity", "Neutral", "Alkalinity"),
+            ylab = "Mean mercury concentration", 
+            xlab = "Calcium level",
+    args.legend = list(bty = "n", cex = 1.5))
+
+abline(h = 0)
+```
+
+Draw the bar plot in the following steps:
+
+- Calculate the mean `Mercury` level for each combination of `pHtype` and `Calcium`, using the `tapply()` function.
+- Save the calculated means in a new object called `trt.mean`.
+- Produce the barplot using `beside = TRUE`, putting a  small space  between the bars. (Reminder: the argument that does this is `space`).
+- Add a legend.
+- Line along horizontal axis.
+
+
+
+

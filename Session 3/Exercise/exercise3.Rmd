@@ -1,0 +1,191 @@
+---
+title: "Introduction to **R**"
+subtitle: "Session 3"
+author: "Statistical Consulting Centre"
+date:  |
+  | `r readLines('../../metadata.txt')[2]`
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = FALSE, eval = FALSE)
+
+load("../../RData/Ex3.RData")
+
+```
+
+
+# 1. Installing an **R** package
+
+**R** packages are collections of user-defined functions. The function `std.error()`, for example, is contained in the `plotrix` package.
+
+1. Let's look at what happens when we try to use a function before actually installing on our computer the package in which it is contained. E.g. Calculate the SEM of age using `std.error`.  
+
+```{r, error = TRUE}
+std.error(lake.df$pH)
+```
+
+
+2. Install the package `plotrix` while in your **R** session by following the instructions below: 
+  
+    (a) Select the **Packages** tab from the bottom right panel of your Rstudio interface.
+    
+    (b) Click on the *Install Packages* icon just below **Packages**.
+    
+    (c) Type `plotrix` in the blank space provided below
+    "*Packages (separate multiple with space or comma):*"
+    
+    (d) Select *No* if you are asked to restart **R**.
+    
+    (e) Submit the code `library(plotrix)` to the **R** console to make the functions contained in the `plotrix` package, available in the current **R** session.
+
+
+```{r}
+library(plotrix)
+```
+
+3. Now, use `std.error()` to calculate the standard error of the `pH`. 
+```{r}
+std.error(lake.df$pH)
+```
+
+
+4. Try writing your own code to calculate the standard error of the `pH` (don't write your own function for this... yet).
+
+$$
+\mathrm{\hat{SEM}} = \frac{s}{\sqrt{N}}
+$$
+
+```{r}
+with(lake.df, sd(pH, na.rm = TRUE)/sqrt(length(pH)))
+```
+
+
+# 2. Write your own function
+
+1.  In Session 3 you were shown a simple function to calculate the standard error of the mean (SEM), i.e.
+
+```
+  mystder <- function(x){
+       mysd <- sd(x, na.rm = TRUE)
+       n <- length(x)
+       mysd/sqrt(n)
+  }
+```
+
+ Type the above code into your **R** script and submit it to the **R** console. 
+
+2. Modify the function in 2.1 so that the output will have only 2 decimal places.
+
+```{r}
+mystder <- function(x){
+       mysd <- sd(x, na.rm = TRUE)
+       n <- length(x)
+       round(mysd/sqrt(n), 2)
+}
+```
+
+3. This function only calculates the standard error correctly if the input does NOT contain missing values. This is because the `length()` function counts the number of elements in the variable, including missing values. Modify it so it gives the correct SEM even if the input contains missing values.
+
+```{r}
+mystder <- function(x){
+       mysd <- sd(x, na.rm = TRUE)
+       n <- sum(!is.na(x))
+       round(mysd/sqrt(n), 2)
+}
+```
+
+4. Calculate the SEM of `pH` using the function you created in 2.3.
+```{r}
+mystder(lake.df$pH)
+```
+
+# 3. `factor`
+
+1. Convert the `pHtype` in `lake.df` into factors with appropriate levels:  "acidic", "natural" and "basic".
+
+```{r}
+lake.df$pHtype <- factor(lake.df$pHtype, levels = c( "acidic", "natural", "basic"))
+
+```
+
+2. Convert the `Calcium` in `lake.df` into factors with appropriate levels:  "Low", "Medium " and "High".
+
+```{r}
+lake.df$Calcium <- factor(lake.df$Calcium, levels = c("Low", "Medium", "High"))
+
+```
+
+3. Produce a two-way frequency table of `Calcium` versus `pHtype`.
+
+```{r}
+with(lake.df, table(Calcium, pHtype))
+
+```
+
+# 4. Combine two data frames
+
+1. `mercury.csv` contains data on mercury contamination in 53 different lakes in Florida. The mercury concentration (parts per million) in the muscle tissue of the fish sampled from that lake were taken in 
+
+      + `Day1`
+      + `Day2`
+      + `Day3`
+
+2. Read the data into **R**, saving it in object named `mercury.df`.
+
+```{r, eval = FALSE}
+mercury.df <- read.csv("Data/Mercury.csv", 
+                      stringsAsFactors = FALSE)
+
+```
+
+```{r, echo = FALSE}
+mercury.df <- read.csv("..\\..\\data\\Mercury.csv", 
+                      stringsAsFactors = FALSE)
+```
+
+
+3. Now combine the two datasets: `lake.df` and `mercury.df` by the `ID`, and call the new dataset `joined.df`. 
+
+```{r}
+library(dplyr)
+joined.df <- left_join(lake.df, mercury.df, by = "ID")
+```
+
+4. Check its dimensions using `dim()`.
+
+```{r}
+dim(joined.df)
+```
+
+5. Print this object's variable names to the console.
+
+```{r}
+names(joined.df)
+```
+
+6. Use `str()` to check all of the variables at once.
+
+```{r}
+str(joined.df)
+```
+
+# 5. Challenge 
+
+Modify the function given in 2.3, so that the function will return a 95% confidence interval (with 2 decimal places).
+
+Hint: A 95% confidence interval of a variable X is given by the average of X $\pm$ 1.96 $\times$ SEM of X.
+
+```{r}
+sem_ci <- function(input){
+       avg <- mean(input, na.rm = TRUE)
+       mysd <- sd(input, na.rm = TRUE)
+       n <- sum(!is.na(input))
+       sem <- mysd / sqrt(n)
+       upperCI <- round(avg + 1.96 * sem, 2)
+       lowerCI <- round(avg - 1.96 * sem, 2)
+       c(lowerCI, upperCI)
+}
+
+sem_ci(joined.df$pH)
+```

@@ -1,0 +1,153 @@
+
+
+\documentclass[12pt,a4paper]{article}
+\usepackage{amsmath}
+\usepackage{enumerate}
+\usepackage[cm]{fullpage}
+\usepackage{graphicx}
+\begin{document}
+\setlength\parindent{0cm}
+%\setlength{\oddsidemargin}{0.25cm}
+%\setlength{\evensidemargin}{0.25cm}
+\title{\Large{\textbf{Introduction to \texttt{R}}}\\
+\textit{Session 8 exercises}}
+\author{Statistical Consulting Centre}
+\date{2 March, 2017}
+\maketitle
+ 
+ 
+<<echo = FALSE>>=
+options(continue = " ")
+opts_chunk$set(comment=NA)
+sports.df <- read.csv("../../Data/sports.csv")
+exclude.q1a <- which(sports.df$q1a ==  "Can?t choose")
+sports.df$q1a[exclude.q1a] = NA
+exclude.q1b <- which(sports.df$q1b ==  "Can?t choose")
+sports.df$q1b[exclude.q1b] = NA
+exclude.q1c <- which(sports.df$q1c ==  "Can?t choose")
+sports.df$q1c[exclude.q1c] = NA
+exclude.q1d <- which(sports.df$q1d ==  "Can?t choose")
+sports.df$q1d[exclude.q1d] = NA
+exclude.q1e <- which(sports.df$q1e ==  "Can?t choose")
+sports.df$q1e[exclude.q1e] = NA
+exclude.ethnicity <- which(sports.df$ethnicity == "NA, dont know")
+sports.df$ethnicity[exclude.ethnicity] = NA
+exclude.partner <- with(sports.df, which(partner != "Yes" & partner !="No"))
+sports.df$partner[exclude.partner] = NA
+sports.df$q1a <- factor(sports.df$q1a, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+sports.df$q1b <- factor(sports.df$q1b, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+sports.df$q1c <- factor(sports.df$q1c, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+sports.df$q1d <- factor(sports.df$q1d, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+sports.df$q1e <- factor(sports.df$q1e, levels = c("Daily", "Several times a week", "Several times a month", "Several times a year or less often"))
+age.group <- with(sports.df, ifelse(age <= 40, "Under 40", 
+                             ifelse(age > 40 & age <=60, "41 to 60", "Over 61")))
+age.group <- factor(age.group, levels = c("Under 40", "41 to 60", "Over 61"))
+sports.df$age.group <- age.group
+q1a.sc <- as.numeric(sports.df$q1a)
+q1b.sc <- as.numeric(sports.df$q1b)
+q1c.sc <- as.numeric(sports.df$q1c)
+q1d.sc <- as.numeric(sports.df$q1d)
+q1e.sc <- as.numeric(sports.df$q1e)
+mean.df <- data.frame(cbind(q1a.sc, q1b.sc, q1c.sc, q1d.sc, q1e.sc))
+nerdy.sc <- apply(mean.df, 1, mean, na.rm = T)
+mean.df$nerdy.sc <- nerdy.sc
+sports.df$nerdy.sc <- nerdy.sc
+sports.df$income = factor(sports.df$income, levels = c("5 000$", "10 000$-15 000$", "15 000$-20 000$",
+                                             "20 000$-25 000$", "25 000$-30 000$", "30 000$-40 000$",
+                                             "40 000$-50 000$", "50 000$-70 000$", "70 000$-100 000$",
+                                             "> 100 000$"))
+@ 
+
+\section{Linear regression} 
+\label{sec:lm}
+\begin{enumerate}[(i)]
+\item Perform a linear regression between age (explanatory variable) and nerdy score (dependent variable).
+<<echo = FALSE, results = 'hide'>>=
+linear <- lm(nerdy.sc~age, data=sports.df)
+@
+\item Are the estimated intercept and slope significantly different from zero?
+<<echo = FALSE, results = 'hide'>>=
+summary(linear)
+@
+\item Examine the residuals of the fitted linear model.
+<<fig.align ='center', out.width = "0.6\\textwidth", echo = FALSE, results = 'hide'>>=
+#plot(residuals(linear))
+#qqnorm(residuals(linear))
+#qqline(residuals(linear), lwd = 2, col = 2)
+@
+\item Add the fitted line to the scatterplot of nerdy score against age.
+<<fig.align ='center', out.width = "0.6\\textwidth",echo = FALSE, results = 'hide'>>=
+estimated.intercept <- coef(linear)[1]
+estimated.slope <- coef(linear)[2]
+#with(sports.df, plot(age, nerdy.sc), xlab = "Age", ylab = "Nerdy score")
+#abline(a = estimated.intercept, b = estimated.slope, lwd = 2, col = 2)
+@
+\item What conclusions can you draw? Do you think age and nerdy score are linearly correlated?
+\end{enumerate}
+
+
+\section{Logistic Regression} 
+\label{sec:log}
+\begin{enumerate}[(i)]
+
+\subsection{Continuous explanatory variable}
+
+\item Suppose we want to model the probability of being male, i.e., \texttt{gender = Male}. First, ensure that \texttt{gender} is a variable with a correct type. 
+<<echo = FALSE, results = 'hide'>>=
+# Check gender 
+class(sports.df$gender)
+
+sports.df$gender <- ifelse(sports.df$gender == "Male", 1, 0)
+@
+\item Fit a logistic model with \texttt{gender} as the response variable and \texttt{nerdy.sc} as the explanatory variable.
+<<echo = FALSE, results = 'hide'>>=
+myglm <- with(sports.df, glm(gender~nerdy.sc, family = binomial))
+@
+\item Perform an analysis of deviance to determine the overall significance of \texttt{nerdy.sc}.
+<<echo = FALSE, results = 'hide'>>=
+anova(myglm, test = "Chisq")
+@
+\item Calculate the estimated slope of the logistic regression. What can you conclude about the slope?
+<<echo = FALSE, results = 'hide'>>=
+summary(myglm)
+@
+\end{enumerate}
+
+\subsection{Categorical explanatory variable}
+\begin{enumerate}[(i)]
+\item We now want to model the probability of living with a partner given age group. \texttt{partner} is already of type \texttt{factor}. Now, generate a one-way table of \texttt{partner} to examine its contents. %Notice that there are only \texttt{Yes} and \texttt{No} cases remaining.
+<<echo = FALSE, results = 'hide'>>=
+table(sports.df$partner)
+@
+\item Set \texttt{partner} = \texttt{Yes} as the reference level.
+<<tidy = F,echo = FALSE, results = 'hide'>>=
+sports.df$partner <- factor(sports.df$partner, levels=c("Yes", "No"))
+@
+\item Once again geenerate the one-way frequency table of \texttt{partner}.
+<<echo = FALSE, results = 'hide'>>=
+table(sports.df$partner)
+@
+\item Fit a logistic model with \texttt{partner} as the response variable and \texttt{age.group} as the explanatory variable.
+<<echo = FALSE, results = 'hide'>>=
+myglm2 <- with(sports.df, glm(partner~age.group, family = binomial))
+@
+\item Is \texttt{age.group} a significant predictor of whether or not an individual in particular age group has a partner?
+<<echo = F, results='hide'>>=
+anova(myglm2, test = "Chisq")
+myp <- round( anova(myglm2, test = "Chisq")[2,5], 2)
+@
+%\item[] Not at the 5\% level of significance since $p$ = \Sexpr{myp}.
+\item Generate a two-way frequency table of \texttt{partner} against \texttt{age.group}. 
+<<echo = FALSE, results = 'hide'>>=
+twoway.tab <- with(sports.df, table(partner, age.group))
+twoway.tab 
+@
+\item Convert these frequencies to percentages of age group total. Does this table agree with your earlier conclusion?
+<<echo = FALSE, results = 'hide'>>=
+round(100*prop.table(twoway.tab, 2), 1)
+@
+%\item[] Yes, since the percentages of \texttt{Yes} and \texttt{No} are approximately the same across age groups.
+\end{enumerate}
+
+
+\end{document}
